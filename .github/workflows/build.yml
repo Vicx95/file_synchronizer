@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 
 jobs:
-  testApp:
+  file_synchronizer:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
