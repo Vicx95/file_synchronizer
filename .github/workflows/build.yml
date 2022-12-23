@@ -1,0 +1,28 @@
+name: C++ with CMake CI
+
+on: [push, pull_request]
+
+
+jobs:
+  testApp:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@master
+    - name: mkdir build
+      run: mkdir build
+    - name: Compile
+      working-directory: build
+      run: |
+        cmake ..
+        make
+    - name: Run tests
+      working-directory: build
+      run: ctest -V
+    - name: Run Valgrind
+      working-directory: build
+      run: |
+          sudo apt-get update -y
+          sudo apt-get install -y valgrind
+          valgrind --leak-check=full ./testApp
+          valgrind --leak-check=full ./testApp-ut
