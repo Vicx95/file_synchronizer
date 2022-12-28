@@ -103,7 +103,7 @@ void UserInterface::printDirectory()
 
 void UserInterface::printFiles()
 {
-    fs::current_path(mainDirectoryPath);
+    std::set<fs::path> sorted_by_name;
     std::cout << "Give folder name or choose 'all' to print files: \n";
     std::string dirName;
     std::cin.clear();
@@ -114,8 +114,21 @@ void UserInterface::printFiles()
     
     for (auto const& dirEntry : fs::recursive_directory_iterator(dirName))
     {
-        std::cout << dirEntry.path().filename() << "\n-------------------\n";
-        //std::cout << dirEntry.path() << "\n";
+        sorted_by_name.insert(dirEntry.path());
+    }
+    
+    for(auto const& fileName : sorted_by_name)
+    {
+        if(fs::is_directory(fileName))
+        {
+            std::cout << "-------------------\n";
+            std::cout << "Directory: " << fileName.filename() << ":\n";
+
+        }
+        if(fs::is_regular_file(fileName))
+        {
+            std::cout << fileName.filename() << "\n";
+        }
     }
 
     if(fs::is_empty(mainDirectoryPath / dirName))
