@@ -12,10 +12,15 @@ FetchContent_Declare(
 )
 
 set(SOURCES 
-    src/main.cpp 
+    src/main.cpp
+    src/userInterface.cpp 
     )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+set(HEADERS 
+    inc/userInterface.hpp
+    )
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 
