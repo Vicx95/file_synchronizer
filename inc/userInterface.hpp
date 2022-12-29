@@ -1,8 +1,9 @@
-#include <string>
 #include <filesystem>
+#include <string>
 
 class UserInterface {
     const decltype(std::filesystem::current_path()) mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
+
 public:
     enum class Action { AddDir = 1,
                         RemoveDir = 2,
@@ -20,6 +21,7 @@ public:
 
     void waitForButton();
     bool validationForRemoving(std::string name);
+    bool validationForPrinting(std::string name);
 
     void addDirectory();
     void removeDirectory();

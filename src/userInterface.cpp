@@ -1,21 +1,17 @@
-#include <iostream>
-#include <fstream>
-#include <ostream>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <ostream>
 #include <set>
 
 #include "..//inc/userInterface.hpp"
 
 namespace fs = std::filesystem;
 
-UserInterface::UserInterface() 
-{
-    if(fs::exists(mainDirectoryPath))
-    {
+UserInterface::UserInterface() {
+    if (fs::exists(mainDirectoryPath)) {
         fs::current_path(mainDirectoryPath);
-    }
-    else
-    {
+    } else {
         fs::current_path(fs::current_path().parent_path());
         fs::create_directory("mainDirectory");
         fs::current_path(mainDirectoryPath);
@@ -33,7 +29,6 @@ void UserInterface::startSynchronizer() {
             break;
         makeAction(static_cast<Action>(action));
         std::system("clear");
-
     }
 }
 
@@ -48,158 +43,155 @@ void UserInterface::printOptions() {
               << "7. Force sync-up  \n";
 }
 
-void UserInterface::makeAction(Action choice)
-{
-    switch(choice) 
-    {
-        case Action::AddDir:
-            std::cout << "added directory \n";
-            addDirectory();
-            break;
-        case Action::RemoveDir:
-            std::cout << "Removed directory \n";
-            removeDirectory();
-            break;
-        case Action::RemoveFile:
-            std::cout << "Removed file \n";
-            removeFile();
-            break;
-        case Action::PrintDir:
-            printDirectory();
-            break;
-        case Action::PrintFiles:
-            printFiles();
-            break;
-        case Action::SetIntervalTime:
-            break;
-        case Action::ForceSync:
-            break;
-        case Action::Exit:
-            break;
-        default:
-            break;
+void UserInterface::makeAction(Action choice) {
+    switch (choice) {
+    case UserInterface::Action::AddDir:
+        std::cout << "added directory \n";
+        addDirectory();
+        break;
+    case Action::RemoveDir:
+        std::cout << "Removed directory \n";
+        removeDirectory();
+        break;
+    case Action::RemoveFile:
+        std::cout << "Removed file \n";
+        removeFile();
+        break;
+    case Action::PrintDir:
+        printDirectory();
+        break;
+    case Action::PrintFiles:
+        printFiles();
+        break;
+    case Action::SetIntervalTime:
+        break;
+    case Action::ForceSync:
+        break;
+    case Action::Exit:
+        break;
+    default:
+        std::cout << "Incorrect action selected! Please try again...\n";
+        waitForButton();
+        break;
     }
-
 }
 
-void UserInterface::printMenu() 
-{
+void UserInterface::printMenu() {
     std::cout << "### FILE SYNCHRONIZER ### \n\n";
 }
 
-void UserInterface::printDirectory()
-{
+void UserInterface::printDirectory() {
     fs::current_path(mainDirectoryPath);
     std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
 
-    for (auto const& dirEntry : fs::directory_iterator(mainDirectoryPath))
-    {
+    for (auto const& dirEntry : fs::directory_iterator(mainDirectoryPath)) {
         std::cout << dirEntry.path() << std::endl;
     }
-    if(fs::is_empty(mainDirectoryPath))
+    if (fs::is_empty(mainDirectoryPath))
         std::cout << "Folder is empty...\n";
     waitForButton();
-} 
+}
 
-void UserInterface::printFiles()
-{
+void UserInterface::printFiles() {
     std::set<fs::path> sorted_by_name;
     std::cout << "Give folder name or choose 'all' to print files: \n";
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
 
-    if(dirName == "all")
-        dirName = mainDirectoryPath;
-    
-    for (auto const& dirEntry : fs::recursive_directory_iterator(dirName))
-    {
-        sorted_by_name.insert(dirEntry.path());
-    }
-    
-    for(auto const& fileName : sorted_by_name)
-    {
-        if(fs::is_directory(fileName))
-        {
-            std::cout << "-------------------\n";
-            std::cout << "Directory: " << fileName.filename() << ":\n";
-
+    if (validationForPrinting(dirName)) {
+        if (dirName == "all") {
+            dirName = mainDirectoryPath;
         }
-        if(fs::is_regular_file(fileName))
-        {
-            std::cout << fileName.filename() << "\n";
+        for (auto const& dirEntry : fs::recursive_directory_iterator(dirName)) {
+            sorted_by_name.insert(dirEntry.path());
         }
-    }
 
-    if(fs::is_empty(mainDirectoryPath / dirName))
-        std::cout << "Folder is empty...";
+        for (auto const& fileName : sorted_by_name) {
+            if (fs::is_directory(fileName)) {
+                std::cout << "-------------------\n";
+                std::cout << "Directory: " << fileName.filename() << ":\n";
+            }
+            if (fs::is_regular_file(fileName)) {
+                std::cout << fileName.filename() << "\n";
+            }
+        }
 
+        if (fs::is_empty(mainDirectoryPath / dirName))
+            std::cout << "Folder is empty...";
+    
     std::cout << "\n";
     waitForButton();
+    }
+
 }
 
-void UserInterface::addDirectory()
-{
-    //fs::current_path(mainDirectoryPath);
+void UserInterface::addDirectory() {
+    // fs::current_path(mainDirectoryPath);
 
     std::cout << "Give folder name to add: \n";
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
-    fs::create_directory(dirName);
-
+    if (!fs::exists(fs::current_path() / dirName))
+    {
+        fs::create_directory(dirName);
+    }
+    else
+    {
+        std::cout << "Dir already exist...\n";
+        waitForButton();
+    }
 }
 
-void UserInterface::removeDirectory()
-{
-    //fs::current_path(mainDirectoryPath);
+void UserInterface::removeDirectory() {
+    // fs::current_path(mainDirectoryPath);
     std::cout << "Give folder name to remove: \n";
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
-    validationForRemoving(dirName);
-    try
-    {
+    if (validationForRemoving(dirName)) {
         fs::remove_all(dirName);
     }
-    catch(std::filesystem::filesystem_error const& ex)
-    {
-        std::cerr << ex.what() << '\n';
-    }
-    
-    
 }
 
-void UserInterface::removeFile()
-{
+void UserInterface::removeFile() {
     std::cout << "Give folder name with files to delete: \n";
     fs::current_path(mainDirectoryPath);
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
-    if(validationForRemoving(dirName))
-        fs::current_path(mainDirectoryPath / dirName);    
-    std::cout << "Give file name to remove: \n";
-    std::string fileName;
-    std::cin.clear();
-    std::cin >> fileName;
-    validationForRemoving(fileName);
-    fs::remove(fileName);
+    if (validationForRemoving(dirName)) {
+        fs::current_path(mainDirectoryPath / dirName);
+        std::cout << "Give file name to remove: \n";
+        std::string fileName;
+        std::cin.clear();
+        std::cin >> fileName;
+        if (validationForRemoving(fileName)) {
+            fs::remove(fileName);
+        }
+    }
 }
 
-void UserInterface::waitForButton()
-{
-    std::cout << "\nPress any button to continue... \n";
-    std::string button;
-    std::cin.clear();
-    std::cin >> button;
+void UserInterface::waitForButton() {
+    system("read -n 1 -s -p \"Press any key to continue...\"");
 }
 
-bool UserInterface::validationForRemoving(std::string name)
-{
-    if(!fs::exists(mainDirectoryPath / name))
-    {
-        std::cout << "Given folder/file name not exist...\n";
+bool UserInterface::validationForRemoving(std::string name) {
+    if (!fs::exists(fs::current_path() / name)) {
+        std::cout << "Not exist file or directory\n";
+        waitForButton();
+        return false;
+    }
+    return true;
+}
+
+bool UserInterface::validationForPrinting(std::string name) {
+    if (name == "all") {
+        return true;
+    }
+    if (!fs::exists(fs::current_path() / name)) {
+        std::cout << "Not exist file or directory\n";
         waitForButton();
         return false;
     }
