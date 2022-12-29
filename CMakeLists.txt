@@ -23,17 +23,19 @@ set(HEADERS
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
+add_library(${PROJECT_NAME}-lib STATIC ${SOURCES})
 
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 set(UT-SOURCES 
     tests/main.cpp
+    tests/userInterface-ut.cpp
     )
 
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})
 link_libraries(gmock)
-target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock)
+target_link_libraries(${PROJECT_NAME}-ut ${PROJECT_NAME}-lib gtest_main gmock)
 target_compile_options(${PROJECT_NAME}-ut PRIVATE ${FLAGS})
 
 add_test(NAME ${PROJECT_NAME}-test COMMAND ${PROJECT_NAME}-ut)

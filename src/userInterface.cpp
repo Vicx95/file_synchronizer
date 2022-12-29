@@ -47,7 +47,7 @@ void UserInterface::makeAction(Action choice) {
     switch (choice) {
     case UserInterface::Action::AddDir:
         std::cout << "added directory \n";
-        addDirectory();
+        addDirectory(std::cin);
         break;
     case Action::RemoveDir:
         std::cout << "Removed directory \n";
@@ -126,36 +126,41 @@ void UserInterface::printFiles() {
 
 }
 
-void UserInterface::addDirectory() {
-    // fs::current_path(mainDirectoryPath);
+ErrorCode UserInterface::addDirectory(std::istream &std_input) {
+    fs::current_path(mainDirectoryPath);
 
     std::cout << "Give folder name to add: \n";
     std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
+    //std::cin.clear();
+    //std::cin >> dirName;
+    std_input >> dirName;
     if (!fs::exists(fs::current_path() / dirName))
     {
         fs::create_directory(dirName);
+        return ErrorCode::SUCCESS;
     }
     else
     {
         std::cout << "Dir already exist...\n";
         waitForButton();
+        return ErrorCode::FAIL;
     }
 }
 
-void UserInterface::removeDirectory() {
-    // fs::current_path(mainDirectoryPath);
+ErrorCode UserInterface::removeDirectory() {
+    fs::current_path(mainDirectoryPath);
     std::cout << "Give folder name to remove: \n";
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
     if (validationForRemoving(dirName)) {
         fs::remove_all(dirName);
+        return ErrorCode::SUCCESS;
     }
+    return ErrorCode::FAIL;
 }
 
-void UserInterface::removeFile() {
+ErrorCode UserInterface::removeFile() {
     std::cout << "Give folder name with files to delete: \n";
     fs::current_path(mainDirectoryPath);
     std::string dirName;
@@ -169,8 +174,10 @@ void UserInterface::removeFile() {
         std::cin >> fileName;
         if (validationForRemoving(fileName)) {
             fs::remove(fileName);
+            return ErrorCode::SUCCESS;
         }
     }
+    return ErrorCode::FAIL;
 }
 
 void UserInterface::waitForButton() {

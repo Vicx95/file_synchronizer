@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <string>
 
+enum class ErrorCode { SUCCESS = 0, FAIL = 1};
+
 class UserInterface {
     const decltype(std::filesystem::current_path()) mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 
@@ -23,9 +25,9 @@ public:
     bool validationForRemoving(std::string name);
     bool validationForPrinting(std::string name);
 
-    void addDirectory();
-    void removeDirectory();
-    void removeFile();
+    ErrorCode addDirectory(std::istream &std_input);
+    ErrorCode removeDirectory();
+    ErrorCode removeFile();
     void printDirectory();
     void printFiles();
 };
