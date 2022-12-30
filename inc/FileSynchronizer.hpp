@@ -12,6 +12,6 @@ public:
 
 private:
     std::vector<std::unique_ptr<Folder>> m_synchronizedFolders;
-    std::vector<std::unique_ptr<Folder>> m_synchronizedFolders;
+    std::vector<std::unique_ptr<Folder>> m_previousSynchronizedFolders;
     Scanner m_scanner;
 };

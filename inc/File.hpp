@@ -5,5 +5,5 @@
 class File {
 public:
 protected:
-    std::string m_content;
+    bool m_isFileChanged{false};
 };
