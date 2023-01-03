@@ -13,6 +13,7 @@ FetchContent_Declare(
 
 set(SOURCES 
     src/main.cpp 
+    src/timer.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
