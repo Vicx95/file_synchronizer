@@ -9,12 +9,11 @@ using PathAndTime = std::pair<fs::path, fs::file_time_type>;
 class Scanner {
 public:
     Scanner();
-    void synchronize() {}
+    void synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles);
     void scan(fs::path dirPath);
     std::vector<PathAndTime> scanning(fs::path dirPath);
     void printLastScanning();
     void printPreviousLastScanning();
-    std::string printTime(fs::path path);
     std::string convertDateTimeToString(fs::file_time_type ftime);
     std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>>  comparingPreviousAndLastScanning(std::vector<PathAndTime> previous, std::vector<PathAndTime> last);
 
