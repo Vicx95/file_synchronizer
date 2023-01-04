@@ -3,27 +3,31 @@
 #include <filesystem>
 #include "timer.hpp"
 
+using Path_t = std::filesystem::path;
+
 enum class ErrorCode { SUCCESS = 0, FAIL = 1};
 
 
-void synchronizeFolders()
+/* void synchronizeFolders()
 {
     std::puts("Synchronizuje!");
-}
+} */
 
 class Model
 {
-	const decltype(std::filesystem::current_path()) mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
+	const Path_t mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 
 public:
-	Model(i_Timer& syncTimer);
+	Model(i_Timer* syncTimer);
     ErrorCode addDirectory(std::istream &std_input);
 	ErrorCode removeDirectory();
     ErrorCode removeFile();
     void startSync();
 
+    Path_t getMainDirectoryPath();
+
 private:
     bool validationForRemoving(std::string name);
-    i_Timer& m_syncTimer; 
+    i_Timer* m_syncTimer; 
     int m_timeInterval = 1000;
 };

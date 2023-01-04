@@ -7,7 +7,7 @@
 int main() {
     Timer tm;
     View v;
-	Model m(tm);
+	Model m(&tm);
 	Controller c(&v, &m);
 	v.setListener(&c);
 	v.run();

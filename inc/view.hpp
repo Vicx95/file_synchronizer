@@ -1,11 +1,15 @@
 #pragma once
 
+#include <filesystem>
 #include <iostream>
+#include <regex>
+
+using Path_t = std::filesystem::path;
 
 class i_ViewListener
 {
 public:
-	virtual void addDirectory(std::cin) = 0;
+	virtual void addDirectory(std::istream& std_input) = 0;
     virtual void removeDirectory() = 0;
     virtual void removeFile() = 0;
     virtual void printDirectory() = 0;
@@ -13,12 +17,12 @@ public:
     virtual void setIntervalTime() = 0;
     virtual void startSync() = 0;
     virtual void forceSync() = 0;
-    virtual void exit() = 0;
+    virtual bool exit() = 0;
 };
 
 class View
 {
-	i_ViewListener* listener;
+	
 public:
     enum class Action 
     { 
@@ -41,7 +45,12 @@ public:
     void printFiles();
     static void waitForButton();
 
+    void setMainDirectoryPath(const Path_t& path);
+
 private:
     bool validationForPrinting(std::string name);
+    Path_t mainDirectoryPath;
 
+    bool m_isExitRequested = false;
+    i_ViewListener* listener;
 };

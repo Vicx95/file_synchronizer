@@ -10,6 +10,8 @@ typedef std::function<void(void)> Callback;
 
 class i_Timer
 {
+public:
+
     virtual void start(const Interval& interval, const Callback& timeoutCallback) = 0;
     virtual void stop() = 0;
 };

@@ -6,9 +6,9 @@
 class Controller : public i_ViewListener
 {
 public:
-	Controller(View& view, Model& model);
+	Controller(View* view, Model* model);
 
-	virtual void addDirectory(std::cin) override;
+	virtual void addDirectory(std::istream& std_input) override;
     virtual void removeDirectory() override;
     virtual void removeFile() override;
     virtual void printDirectory() override;
@@ -16,10 +16,12 @@ public:
     virtual void setIntervalTime() override;
     virtual void startSync() override;
     virtual void forceSync() override;
-    virtual void exit() override;
+    virtual bool exit() override;
 
 private:
 
-    View& m_view;
-	Model& m_model;
+    View* m_view;
+	Model* m_model;
+
+    bool m_isExitRequested = true;
 };

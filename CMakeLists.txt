@@ -12,8 +12,11 @@ FetchContent_Declare(
 )
 
 set(SOURCES 
+    src/controller.cpp
     src/main.cpp 
+    src/model.cpp
     src/timer.cpp
+    src/view.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
