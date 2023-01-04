@@ -13,11 +13,15 @@ FetchContent_Declare(
 
 set(SOURCES 
     src/main.cpp
-    src/Scanner.cpp 
+    src/Scanner.cpp
+    src/timer.cpp
+    src/FileSynchronizer.cpp 
     )
 
 set(HEADERS 
     inc/Scanner.hpp
+    inc/timer.hpp
+    inc/FileSynchronizer.hpp
     )
     
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

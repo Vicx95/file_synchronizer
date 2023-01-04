@@ -95,7 +95,7 @@ void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAn
         if(fs::is_regular_file(el.first)){
             for(auto dir : fs::directory_iterator(el.first.parent_path().parent_path()))
                 try{
-                 std::cout << dir / el.first.filename() << std::endl;
+                 //std::cout << dir / el.first.filename() << std::endl;
                  if(el.first != dir / el.first.filename())
                     fs::copy_file(el.first, dir / el.first.filename(), fs::copy_options::update_existing);
                 }
