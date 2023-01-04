@@ -1,7 +1,10 @@
 #include "..//inc/view.hpp"
+#include "..//inc/model.hpp"
 
 #include <set>
 #include <filesystem>
+#include <cstdlib>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -11,7 +14,7 @@ void View::setListener(i_ViewListener* listener)
 }
 
 void View::printMenu() {
-    std::cout << "### FILE SYNCHRONIZER ### \n\n";
+    std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";
 }
 
 void View::printOptions() {
@@ -26,10 +29,12 @@ void View::printOptions() {
 }
 
 void View::waitForButton() {
-    system("read -n 1 -s -p \"Press any key to continue...\"");
+    std::system("/bin/bash -c \"read -n 1 -s -p \"Pressanykeytocontinue...\"\"");
 }
 
 void View::printDirectory() {
+    
+    
     fs::current_path(mainDirectoryPath);
     std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
 
@@ -89,14 +94,25 @@ void View::printFiles() {
 
 void View::run()
 {   
-    printMenu();
-    printOptions();
-    uint32_t action;
-	while (true)
+    std::string inputKey;
+    std::regex keyRegex("([0-7]{1})");
+
+	while (!m_isExitRequested)
 	{
+        printMenu();
+        printOptions();
+
         std::cin.clear();
-        std::cin >> action;
-		switch (static_cast<Action>(action)) {
+        std::cin >> inputKey;
+
+        if(!std::regex_search(inputKey, keyRegex))
+        {
+            std::cout << "Incorrect action selected! Please try again...\n";
+            usleep(1000000); // would be nice to replace it with std::this_thread::sleep_for()
+            continue;
+        }     
+        
+		switch (static_cast<Action>(std::stoul(inputKey))) {
             case Action::AddDir:
                 std::cout << "added directory \n";
                 listener->addDirectory(std::cin);
@@ -125,7 +141,7 @@ void View::run()
                 listener->forceSync();
                 break;
             case Action::Exit:
-                listener->exit();
+                m_isExitRequested = listener->exit();
                 break;
             default:
                 std::cout << "Incorrect action selected! Please try again...\n";
@@ -133,4 +149,9 @@ void View::run()
                 break;
         }
 	}
+}
+
+void View::setMainDirectoryPath(const Path_t& path)
+{
+    mainDirectoryPath = path;
 }

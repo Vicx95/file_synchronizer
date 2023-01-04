@@ -2,10 +2,10 @@
 
 Timer::~Timer() 
 {
-    if (m_timerIsRunning) {
-        stop();
+    if (!m_timerIsRunning) {
+        m_timerThread.join();
     }
-    m_timerThread.join();
+    
 }
 
 void Timer::start(const Interval& interval, const Callback& timeoutCallback) 

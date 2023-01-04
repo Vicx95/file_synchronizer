@@ -6,13 +6,22 @@
 
 namespace fs = std::filesystem;
 
-Model::Model(i_Timer& syncTimer) : m_syncTimer(syncTimer) 
+Model::Model(i_Timer* syncTimer) : m_syncTimer(syncTimer) 
 {
 
 };
 
 ErrorCode Model::addDirectory(std::istream &std_input) {
+
+    try {
     fs::current_path(mainDirectoryPath);
+
+    } catch (std::filesystem::filesystem_error const& ex)
+    {
+        std::cout << ex.code().message() << '\n';
+        fs::create_directory(mainDirectoryPath);
+        fs::current_path(mainDirectoryPath);
+    }
 
     std::cout << "Give folder name to add: \n";
     std::string dirName;
@@ -76,9 +85,14 @@ ErrorCode Model::removeFile() {
 
 void Model::startSync()
 {
-    m_syncTimer.start(std::chrono::milliseconds(1000), [] {
+    m_syncTimer->start(std::chrono::milliseconds(1000), [] {
         std::puts("Synchronizuje!");
     });
       
+}
+
+Path_t Model::getMainDirectoryPath()
+{
+    return mainDirectoryPath;
 }
 
