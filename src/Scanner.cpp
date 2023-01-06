@@ -90,12 +90,10 @@ std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> Scanner::comparing
 }
 
 void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles){
-    //const auto copyOptions = fs::copy_options::update_existing;
     for(auto el : AddedAndRemovedFiles.first){
         if(fs::is_regular_file(el.first)){
             for(auto dir : fs::directory_iterator(el.first.parent_path().parent_path()))
                 try{
-                 //std::cout << dir / el.first.filename() << std::endl;
                  if(el.first != dir / el.first.filename())
                     fs::copy_file(el.first, dir / el.first.filename(), fs::copy_options::update_existing);
                 }
@@ -105,7 +103,21 @@ void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAn
                 }
         }
     }
+    m_lastScanning = scanning(std::filesystem::current_path() / "../mainDirectory");
+    
+    for(auto el : AddedAndRemovedFiles.second){
+        for(auto dir : fs::directory_iterator(el.first.parent_path().parent_path()))
+            try{
+                if(el.first != dir / el.first.filename() && !(fs::exists(el.first))){
+                    fs::remove(dir / el.first.filename());
+                }
 
-
-
+            }
+            catch (std::exception& e) 
+            {
+                std::cout << e.what();
+            }
+    }
+    m_lastScanning = scanning(std::filesystem::current_path() / "../mainDirectory");
+    
 }
