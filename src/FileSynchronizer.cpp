@@ -1,23 +1,19 @@
 #include "..//inc/FileSynchronizer.hpp"
+
 #include <iostream>
 
-FileSynchronizer::FileSynchronizer()
+FileSynchronizer::FileSynchronizer(Scanner *scanner)
+    : m_scanner(scanner)
 {
-    std::filesystem::path mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
-
-    m_timer.start(std::chrono::milliseconds(15000), [this, mainDirectoryPath] {
-        m_scanner.scan(mainDirectoryPath);
-        std::puts("Synchronizuje!");
-    });
-
-    // std::this_thread::sleep_for(std::chrono::seconds(10));
 }
+
 FileSynchronizer::~FileSynchronizer()
 {
-    m_timer.stop();
+    // m_timer.stop();
 }
 
-void FileSynchronizer::synchronize()
+void FileSynchronizer::synchronize(const Path_t &path)
 {
-    // TODO
+    this->m_scanner->scan(path);
+    std::puts("Synchronizuje!");
 }

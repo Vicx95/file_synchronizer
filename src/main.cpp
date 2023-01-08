@@ -15,20 +15,11 @@ int main()
 {
     Timer tm;
     View v;
-    FileSynchronizer sync;
+    Scanner scanner;
+    FileSynchronizer sync(&scanner);
+
     Model m(&tm, &sync);
     Controller c(&v, &m);
     v.setListener(&c);
     v.run();
-
-    /*     std::cout << "Hello from app!\n";
-        FileSynchronizer synchronizer;
-        // Scanner scanner;
-        //   std::filesystem::path mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
-        // scanner.scan(mainDirectoryPath);
-        // scanner.printLastScanning();
-        // scanner.printPreviousLastScanning();
-        uint32_t num;
-        std::cin >> num; // input number to exit program.
-        //  scanner.scan(mainDirectoryPath); */
 }

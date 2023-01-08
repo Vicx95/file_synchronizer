@@ -32,6 +32,5 @@ private:
     i_Timer *m_syncTimer;
     i_FileSynchronizer *m_fileSynchronizer;
 
-    int m_timeInterval = 1000;
     std::chrono::duration<int64_t, std::milli> m_interval;
 };

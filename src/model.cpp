@@ -8,9 +8,9 @@
 namespace fs = std::filesystem;
 
 Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer)
-    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer){
+    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_interval(1000){
 
-                              };
+                                                                    };
 
 ErrorCode Model::addDirectory(std::istream &std_input)
 {
@@ -46,7 +46,7 @@ ErrorCode Model::addDirectory(std::istream &std_input)
 
 void Model::setIntervalTime(std::istream &std_input)
 {
-    std::cout << "Interval time value [sec]: \n";
+    std::cout << "Interval time value [milliseconds]: \n";
     int64_t input;
 
     std_input.clear();
@@ -107,7 +107,7 @@ ErrorCode Model::removeFile()
 
 void Model::startSync()
 {
-    m_syncTimer->start(std::chrono::milliseconds(m_timeInterval), [this]() { m_fileSynchronizer->synchronize(); });
+    m_syncTimer->start(m_interval, [this]() { m_fileSynchronizer->synchronize(getMainDirectoryPath()); });
 }
 
 Path_t Model::getMainDirectoryPath()

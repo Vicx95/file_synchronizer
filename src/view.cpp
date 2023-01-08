@@ -27,7 +27,8 @@ void View::printOptions()
               << "4. Print all directories \n"
               << "5. Print all files \n"
               << "6. Set interval time  \n"
-              << "7. Force sync-up  \n";
+              << "7. Start sync-up  \n"
+              << "8. Force sync-up  \n";
 }
 
 void View::waitForButton()
@@ -108,7 +109,7 @@ void View::printFiles()
 void View::run()
 {
     std::string inputKey;
-    std::regex keyRegex("([0-7]{1})");
+    std::regex keyRegex("([0-8]{1})");
 
     while (!m_isExitRequested)
     {
