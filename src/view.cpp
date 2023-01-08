@@ -50,7 +50,7 @@ void View::printDirectory()
     waitForButton();
 }
 
-bool View::validationForPrinting(std::string name)
+bool View::validateForPrinting(std::string name)
 {
     if (name == "all")
     {
@@ -73,7 +73,7 @@ void View::printFiles()
     std::cin.clear();
     std::cin >> dirName;
 
-    if (validationForPrinting(dirName))
+    if (validateForPrinting(dirName))
     {
         if (dirName == "all")
         {
@@ -146,7 +146,7 @@ void View::run()
             listener->printFiles();
             break;
         case Action::SetIntervalTime:
-            listener->setIntervalTime();
+            listener->setIntervalTime(std::cin);
             break;
         case Action::StartSync:
             listener->startSync();

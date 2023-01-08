@@ -12,8 +12,12 @@ FileSynchronizer::FileSynchronizer()
 
     // std::this_thread::sleep_for(std::chrono::seconds(10));
 }
-
-void FileSynchronizer::setTimeInterval()
+FileSynchronizer::~FileSynchronizer()
 {
-    std::cout << "Timer interval set to: \n";
+    m_timer.stop();
+}
+
+void FileSynchronizer::synchronize()
+{
+    // TODO
 }

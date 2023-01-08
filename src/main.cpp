@@ -15,7 +15,8 @@ int main()
 {
     Timer tm;
     View v;
-    Model m(&tm);
+    FileSynchronizer sync;
+    Model m(&tm, &sync);
     Controller c(&v, &m);
     v.setListener(&c);
     v.run();

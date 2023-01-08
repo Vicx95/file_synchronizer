@@ -21,16 +21,7 @@ set(SOURCES
     src/Scanner.cpp
     )
 
-set(HEADERS 
-    inc/controller.hpp
-    inc/model.hpp
-    inc/view.hpp
-    inc/timer.hpp
-    inc/FileSynchronizer.hpp 
-    inc/Scanner.hpp
-    )
-    
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 

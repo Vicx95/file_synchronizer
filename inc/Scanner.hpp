@@ -12,15 +12,15 @@ public:
     Scanner();
     void synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles);
     void scan(fs::path dirPath);
-    std::vector<PathAndTime> scanning(fs::path dirPath);
-    void printLastScanning();
-    void printPreviousLastScanning();
+    std::vector<PathAndTime> scanForChangedDirs(const fs::path &dirPath);
+    void printRecentScanResult();
+    void printPreviousScanResult();
     std::string convertDateTimeToString(fs::file_time_type ftime);
-    std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> comparingPreviousAndLastScanning(std::vector<PathAndTime> previous, std::vector<PathAndTime> last);
+    std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> comparePreviousAndRecentScanning(std::vector<PathAndTime> previous, std::vector<PathAndTime> last);
 
 private:
-    std::vector<PathAndTime> m_lastScanning;
-    std::vector<PathAndTime> m_previousLastScanning;
+    std::vector<PathAndTime> m_recentScanning;
+    std::vector<PathAndTime> m_previousScanning;
     // auto time_compare = [](const fs::path& lhs, const fs::path& rhs) {
     //     const auto lhs_time = std::filesystem::last_write_time(lhs);
     //     const auto rhs_time = std::filesystem::last_write_time(rhs);

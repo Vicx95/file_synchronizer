@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FileSynchronizer.hpp"
 #include "timer.hpp"
 #include <filesystem>
 
@@ -11,26 +12,26 @@ enum class ErrorCode
     FAIL = 1
 };
 
-/* void synchronizeFolders()
-{
-    std::puts("Synchronizuje!");
-} */
-
 class Model
 {
     const Path_t mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 
 public:
-    Model(i_Timer *syncTimer);
+    Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer);
+
     ErrorCode addDirectory(std::istream &std_input);
+    void setIntervalTime(std::istream &std_input);
     ErrorCode removeDirectory();
     ErrorCode removeFile();
     void startSync();
-
     Path_t getMainDirectoryPath();
 
 private:
-    bool validationForRemoving(std::string name);
+    bool validateForRemoval(std::string name);
+
     i_Timer *m_syncTimer;
+    i_FileSynchronizer *m_fileSynchronizer;
+
     int m_timeInterval = 1000;
+    std::chrono::duration<int64_t, std::milli> m_interval;
 };

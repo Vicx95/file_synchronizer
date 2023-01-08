@@ -2,14 +2,15 @@
 #include "..//inc/model.hpp"
 #include "..//inc/view.hpp"
 
+#include <chrono>
 #include <iostream>
 
 namespace fs = std::filesystem;
 
-Model::Model(i_Timer *syncTimer)
-    : m_syncTimer(syncTimer){
+Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer)
+    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer){
 
-      };
+                              };
 
 ErrorCode Model::addDirectory(std::istream &std_input)
 {
@@ -43,7 +44,19 @@ ErrorCode Model::addDirectory(std::istream &std_input)
     }
 }
 
-bool Model::validationForRemoving(std::string name)
+void Model::setIntervalTime(std::istream &std_input)
+{
+    std::cout << "Interval time value [sec]: \n";
+    int64_t input;
+
+    std_input.clear();
+    std_input >> input;
+
+    std::chrono::duration<int64_t, std::milli> _interval(input);
+    m_interval = _interval;
+}
+
+bool Model::validateForRemoval(std::string name)
 {
     if (!fs::exists(fs::current_path() / name))
     {
@@ -61,7 +74,7 @@ ErrorCode Model::removeDirectory()
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
-    if (validationForRemoving(dirName))
+    if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);
         return ErrorCode::SUCCESS;
@@ -76,14 +89,14 @@ ErrorCode Model::removeFile()
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
-    if (validationForRemoving(dirName))
+    if (validateForRemoval(dirName))
     {
         fs::current_path(mainDirectoryPath / dirName);
         std::cout << "Give file name to remove: \n";
         std::string fileName;
         std::cin.clear();
         std::cin >> fileName;
-        if (validationForRemoving(fileName))
+        if (validateForRemoval(fileName))
         {
             fs::remove(fileName);
             return ErrorCode::SUCCESS;
@@ -94,9 +107,7 @@ ErrorCode Model::removeFile()
 
 void Model::startSync()
 {
-    m_syncTimer->start(std::chrono::milliseconds(1000), [] {
-        std::puts("Synchronizuje!");
-    });
+    m_syncTimer->start(std::chrono::milliseconds(m_timeInterval), [this]() { m_fileSynchronizer->synchronize(); });
 }
 
 Path_t Model::getMainDirectoryPath()

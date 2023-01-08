@@ -26,9 +26,9 @@ void Controller::printFiles()
 {
     m_view->printDirectory();
 }
-void Controller::setIntervalTime()
+void Controller::setIntervalTime(std::istream &std_input)
 {
-    // m_model->setIntervalTime();
+    m_model->setIntervalTime(std_input);
 }
 void Controller::startSync()
 {
