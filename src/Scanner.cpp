@@ -101,6 +101,7 @@ std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> Scanner::comparing
     return {std::make_pair(Added, Removed)};
 }
 
+<<<<<<< HEAD
 void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles)
 {
     // const auto copyOptions = fs::copy_options::update_existing;
@@ -114,6 +115,15 @@ void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAn
                     // std::cout << dir / el.first.filename() << std::endl;
                     if (el.first != dir / el.first.filename())
                         fs::copy_file(el.first, dir / el.first.filename(), fs::copy_options::update_existing);
+=======
+void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles){
+    for(auto el : AddedAndRemovedFiles.first){
+        if(fs::is_regular_file(el.first)){
+            for(auto dir : fs::directory_iterator(el.first.parent_path().parent_path()))
+                try{
+                 if(el.first != dir / el.first.filename())
+                    fs::copy_file(el.first, dir / el.first.filename(), fs::copy_options::update_existing);
+>>>>>>> Synchronizer
                 }
                 catch (std::exception &e)
                 {
@@ -121,4 +131,24 @@ void Scanner::synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAn
                 }
         }
     }
+<<<<<<< HEAD
+=======
+    m_lastScanning = scanning(std::filesystem::current_path() / "../mainDirectory");
+    
+    for(auto el : AddedAndRemovedFiles.second){
+        for(auto dir : fs::directory_iterator(el.first.parent_path().parent_path()))
+            try{
+                if(el.first != dir / el.first.filename() && !(fs::exists(el.first))){
+                    fs::remove(dir / el.first.filename());
+                }
+
+            }
+            catch (std::exception& e) 
+            {
+                std::cout << e.what();
+            }
+    }
+    m_lastScanning = scanning(std::filesystem::current_path() / "../mainDirectory");
+    
+>>>>>>> Synchronizer
 }
