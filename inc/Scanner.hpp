@@ -21,16 +21,4 @@ public:
 private:
     std::vector<PathAndTime> m_recentScanning;
     std::vector<PathAndTime> m_previousScanning;
-    // auto time_compare = [](const fs::path& lhs, const fs::path& rhs) {
-    //     const auto lhs_time = std::filesystem::last_write_time(lhs);
-    //     const auto rhs_time = std::filesystem::last_write_time(rhs);
-    //     return lhs_time == rhs_time ? lhs < rhs : lhs_time < rhs_time;
-    //  };
-    // std::function<bool(fs::file_time_type, fs::file_time_type)> time_comparator = [](const fs::file_time_type& lhs, const fs::file_time_type& rhs) {
-    //    return lhs == rhs ? lhs < rhs : lhs < rhs;
-    //};
-
-    // bool time_compare(PathAndTime lhs, PathAndTime rhs){
-    //     return lhs.first == rhs.first && lhs.second < rhs.second;
-    // }
 };

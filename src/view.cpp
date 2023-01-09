@@ -33,7 +33,7 @@ void View::printOptions()
 
 void View::waitForButton()
 {
-    std::system("/bin/bash -c \"read -n 1 -s -p \"Pressanykeytocontinue...\"\"");
+    std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
 }
 
 void View::printDirectory()

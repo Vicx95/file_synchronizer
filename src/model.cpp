@@ -28,8 +28,7 @@ ErrorCode Model::addDirectory(std::istream &std_input)
 
     std::cout << "Give folder name to add: \n";
     std::string dirName;
-    // std::cin.clear();
-    // std::cin >> dirName;
+    std_input.clear();
     std_input >> dirName;
     if (!fs::exists(fs::current_path() / dirName))
     {
