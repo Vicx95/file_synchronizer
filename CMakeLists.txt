@@ -12,7 +12,13 @@ FetchContent_Declare(
 )
 
 set(SOURCES 
-    src/main.cpp 
+    src/controller.cpp
+    src/main.cpp
+    src/model.cpp
+    src/view.cpp
+    src/timer.cpp
+    src/FileSynchronizer.cpp 
+    src/Scanner.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

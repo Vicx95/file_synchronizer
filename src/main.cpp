@@ -1,5 +1,25 @@
-#include <iostream>
+#include "..//inc/FileSynchronizer.hpp"
+#include "..//inc/Scanner.hpp"
+#include "..//inc/controller.hpp"
+#include "..//inc/model.hpp"
+#include "..//inc/timer.hpp"
+#include "..//inc/view.hpp"
 
-int main() {
-    std::cout << "Hello from app!\n";
+#include <chrono> // chrono::system_clock
+#include <ctime>
+#include <iostream>
+#include <sstream>
+#include <string>
+
+int main()
+{
+    Timer tm;
+    View v;
+    Scanner scanner;
+    FileSynchronizer sync(&scanner);
+
+    Model m(&tm, &sync);
+    Controller c(&v, &m);
+    v.setListener(&c);
+    v.run();
 }
