@@ -6,19 +6,18 @@ Timer::~Timer()
     {
         stop();
     }
-    m_timerThread.join();
 }
 
 void Timer::start(const Interval &interval, const Callback &timeoutCallback)
 {
     m_timerIsRunning = true;
-    m_timerThread = std::thread([this, interval, timeoutCallback] {
+    std::thread([this, interval, timeoutCallback] {
         while (m_timerIsRunning)
         {
             std::this_thread::sleep_for(interval);
             timeoutCallback();
         }
-    });
+    }).detach();
 }
 
 void Timer::stop()

@@ -3,8 +3,6 @@
 #include "Scanner.hpp"
 #include "timer.hpp"
 
-using Path_t = std::filesystem::path;
-
 class i_FileSynchronizer
 {
 public:

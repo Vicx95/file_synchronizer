@@ -40,5 +40,6 @@ void Controller::forceSync()
 }
 bool Controller::exit()
 {
+    m_model->stopSync();
     return true;
 }

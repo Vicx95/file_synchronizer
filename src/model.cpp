@@ -116,7 +116,12 @@ void Model::startSync()
     });
 }
 
-Path_t Model::getMainDirectoryPath()
+void Model::stopSync()
+{
+    m_syncTimer->stop();
+}
+
+fs::path Model::getMainDirectoryPath()
 {
     return m_mainDirectoryPath;
 }
