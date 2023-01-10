@@ -4,21 +4,32 @@
 #include <vector>
 
 namespace fs = std::filesystem;
-using PathAndTime = std::pair<fs::path, fs::file_time_type>;
+using PathTimePair_t = std::pair<fs::path, fs::file_time_type>;
 
-class Scanner
+class i_Scanner
+{
+public:
+    virtual void scan(const fs::path &dirPath) = 0;
+    virtual void scanForChangedDirs(const fs::path &dirPath) = 0;
+    virtual std::pair<std::vector<PathTimePair_t>, std::vector<PathTimePair_t>> comparePreviousAndRecentScanning() = 0;
+};
+
+class Scanner : public i_Scanner
 {
 public:
     Scanner();
-    void synchronize(std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> AddedAndRemovedFiles);
-    void scan(fs::path dirPath);
-    std::vector<PathAndTime> scanForChangedDirs(const fs::path &dirPath);
+    virtual ~Scanner() = default;
+
+    void scan(const fs::path &dirPath) override;
+    void scanForChangedDirs(const fs::path &dirPath) override;
+    std::pair<std::vector<PathTimePair_t>, std::vector<PathTimePair_t>> comparePreviousAndRecentScanning() override;
+
     void printRecentScanResult();
     void printPreviousScanResult();
-    std::string convertDateTimeToString(fs::file_time_type ftime);
-    std::pair<std::vector<PathAndTime>, std::vector<PathAndTime>> comparePreviousAndRecentScanning(std::vector<PathAndTime> previous, std::vector<PathAndTime> last);
 
 private:
-    std::vector<PathAndTime> m_recentScanning;
-    std::vector<PathAndTime> m_previousScanning;
+    std::string convertDateTimeToString(fs::file_time_type ftime);
+
+    std::vector<PathTimePair_t> m_recentScanning;
+    std::vector<PathTimePair_t> m_previousScanning;
 };

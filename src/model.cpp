@@ -7,23 +7,23 @@
 
 namespace fs = std::filesystem;
 
-Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer)
-    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_interval(1000){
+Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner *scanner)
+    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_scanner(scanner), m_interval(1000){
 
-                                                                    };
+                                                                                        };
 
 ErrorCode Model::addDirectory(std::istream &std_input)
 {
 
     try
     {
-        fs::current_path(mainDirectoryPath);
+        fs::current_path(m_mainDirectoryPath);
     }
     catch (std::filesystem::filesystem_error const &ex)
     {
         std::cout << ex.code().message() << '\n';
-        fs::create_directory(mainDirectoryPath);
-        fs::current_path(mainDirectoryPath);
+        fs::create_directory(m_mainDirectoryPath);
+        fs::current_path(m_mainDirectoryPath);
     }
 
     std::cout << "Give folder name to add: \n";
@@ -68,7 +68,7 @@ bool Model::validateForRemoval(std::string name)
 
 ErrorCode Model::removeDirectory()
 {
-    fs::current_path(mainDirectoryPath);
+    fs::current_path(m_mainDirectoryPath);
     std::cout << "Give folder name to remove: \n";
     std::string dirName;
     std::cin.clear();
@@ -84,13 +84,13 @@ ErrorCode Model::removeDirectory()
 ErrorCode Model::removeFile()
 {
     std::cout << "Give folder name with files to delete: \n";
-    fs::current_path(mainDirectoryPath);
+    fs::current_path(m_mainDirectoryPath);
     std::string dirName;
     std::cin.clear();
     std::cin >> dirName;
     if (validateForRemoval(dirName))
     {
-        fs::current_path(mainDirectoryPath / dirName);
+        fs::current_path(m_mainDirectoryPath / dirName);
         std::cout << "Give file name to remove: \n";
         std::string fileName;
         std::cin.clear();
@@ -106,10 +106,22 @@ ErrorCode Model::removeFile()
 
 void Model::startSync()
 {
-    m_syncTimer->start(m_interval, [this]() { m_fileSynchronizer->synchronize(getMainDirectoryPath()); });
+    m_syncTimer->start(m_interval, [this]() {
+        m_scanner->scan(m_mainDirectoryPath);
+        auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
+        m_fileSynchronizer->synchronizeAdded(outputComparing.first);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+        m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+    });
 }
 
-Path_t Model::getMainDirectoryPath()
+void Model::stopSync()
 {
-    return mainDirectoryPath;
+    m_syncTimer->stop();
+}
+
+fs::path Model::getMainDirectoryPath()
+{
+    return m_mainDirectoryPath;
 }

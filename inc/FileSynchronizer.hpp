@@ -3,22 +3,19 @@
 #include "Scanner.hpp"
 #include "timer.hpp"
 
-using Path_t = std::filesystem::path;
-
 class i_FileSynchronizer
 {
 public:
-    virtual void synchronize(const Path_t &path) = 0;
+    virtual void synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles) = 0;
+    virtual void synchronizeRemoved(const std::vector<PathTimePair_t> &removedFiles) = 0;
 };
 
 class FileSynchronizer : public i_FileSynchronizer
 {
 public:
-    FileSynchronizer(Scanner *scanner);
-    virtual ~FileSynchronizer();
+    FileSynchronizer();
+    virtual ~FileSynchronizer() = default;
 
-    void synchronize(const Path_t &path) override;
-
-private:
-    Scanner *m_scanner;
+    void synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles) override;
+    void synchronizeRemoved(const std::vector<PathTimePair_t> &removedFiles) override;
 };

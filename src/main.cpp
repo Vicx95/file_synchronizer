@@ -16,9 +16,9 @@ int main()
     Timer tm;
     View v;
     Scanner scanner;
-    FileSynchronizer sync(&scanner);
+    FileSynchronizer sync;
 
-    Model m(&tm, &sync);
+    Model m(&tm, &sync, &scanner);
     Controller c(&v, &m);
     v.setListener(&c);
     v.run();

@@ -24,6 +24,5 @@ public:
     void stop() override;
 
 private:
-    std::thread m_timerThread{};
     std::atomic_bool m_timerIsRunning{};
 };

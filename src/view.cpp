@@ -129,15 +129,12 @@ void View::run()
         switch (static_cast<Action>(std::stoul(inputKey)))
         {
         case Action::AddDir:
-            std::cout << "added directory \n";
             listener->addDirectory(std::cin);
             break;
         case Action::RemoveDir:
-            std::cout << "Removed directory \n";
             listener->removeDirectory();
             break;
         case Action::RemoveFile:
-            std::cout << "Removed file \n";
             listener->removeFile();
             break;
         case Action::PrintDir:
@@ -166,7 +163,7 @@ void View::run()
     }
 }
 
-void View::setMainDirectoryPath(const Path_t &path)
+void View::setMainDirectoryPath(const fs::path &path)
 {
     mainDirectoryPath = path;
 }

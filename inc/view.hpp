@@ -4,7 +4,7 @@
 #include <iostream>
 #include <regex>
 
-using Path_t = std::filesystem::path;
+namespace fs = std::filesystem;
 
 class i_ViewListener
 {
@@ -44,11 +44,11 @@ public:
     void printDirectory();
     void printFiles();
     static void waitForButton();
-    void setMainDirectoryPath(const Path_t &path);
+    void setMainDirectoryPath(const fs::path &path);
 
 private:
     bool validateForPrinting(std::string name);
-    Path_t mainDirectoryPath;
+    fs::path mainDirectoryPath;
 
     bool m_isExitRequested = false;
     i_ViewListener *listener;
