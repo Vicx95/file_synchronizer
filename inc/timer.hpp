@@ -11,6 +11,7 @@ typedef std::function<void(void)> Callback;
 class i_Timer
 {
 public:
+    virtual ~i_Timer(){};
     virtual void start(const Interval &interval, const Callback &timeoutCallback) = 0;
     virtual void stop() = 0;
 };
@@ -18,8 +19,7 @@ public:
 class Timer : public i_Timer
 {
 public:
-    virtual ~Timer();
-
+    ~Timer();
     void start(const Interval &interval, const Callback &timeoutCallback) override;
     void stop() override;
 

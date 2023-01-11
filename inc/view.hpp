@@ -9,6 +9,7 @@ namespace fs = std::filesystem;
 class i_ViewListener
 {
 public:
+    virtual ~i_ViewListener(){};
     virtual void addDirectory(std::istream &std_input) = 0;
     virtual void removeDirectory() = 0;
     virtual void removeFile() = 0;
