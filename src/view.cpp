@@ -5,8 +5,10 @@
 #include <cstdlib>
 #include <filesystem>
 #include <set>
+#include <thread>
 
 namespace fs = std::filesystem;
+
 
 void View::setListener(i_ViewListener *listener)
 {
@@ -28,7 +30,9 @@ void View::printOptions()
               << "5. Print all files \n"
               << "6. Set interval time  \n"
               << "7. Start sync-up  \n"
-              << "8. Force sync-up  \n";
+              << "8. Force sync-up  \n"
+              << "9. Read config  \n"
+              << "10. Save config  \n";
 }
 
 void View::waitForButton()
@@ -122,7 +126,8 @@ void View::run()
         if (!std::regex_search(inputKey, keyRegex))
         {
             std::cout << "Incorrect action selected! Please try again...\n";
-            usleep(1000000); // would be nice to replace it with std::this_thread::sleep_for()
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000000));
+            //usleep(1000000); // would be nice to replace it with std::this_thread::sleep_for()
             continue;
         }
 

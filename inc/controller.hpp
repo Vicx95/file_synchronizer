@@ -21,6 +21,4 @@ public:
 private:
     View *m_view;
     Model *m_model;
-
-    bool m_isExitRequested = true;
 };

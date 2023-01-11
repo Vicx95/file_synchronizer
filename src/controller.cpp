@@ -4,6 +4,7 @@ Controller::Controller(View *view, Model *model)
     : m_view(view), m_model(model)
 {
     m_view->setMainDirectoryPath(m_model->getMainDirectoryPath());
+
 }
 
 void Controller::addDirectory(std::istream &std_input)
@@ -38,6 +39,16 @@ void Controller::forceSync()
 {
     // m_model->forceSync();
 }
+/*
+void Controller::readConfig()
+{
+    // m_model->readConfig();
+}
+void Controller::saveConfig()
+{
+    // m_model->saveConfig();
+}
+*/
 bool Controller::exit()
 {
     return true;

@@ -14,6 +14,9 @@ Scanner::Scanner()
 
 std::vector<PathAndTime> Scanner::scanForChangedDirs(const fs::path &dirPath)
 {
+    if(!fs::exists(dirPath)){
+        fs::create_directory(dirPath);
+    }
     std::vector<PathAndTime> result;
     result.reserve(1024);
 
@@ -54,8 +57,8 @@ void Scanner::printPreviousScanResult()
 
 std::string Scanner::convertDateTimeToString(fs::file_time_type ftime)
 {
-
-    std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(fs::file_time_type::clock::time_point(ftime)));
+    std::time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+    //std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(fs::file_time_type::clock::time_point(ftime)));
 
     std::stringstream ss;
     ss << std::put_time(std::localtime(&cftime), "%Y-%m-%d %X");

@@ -10,7 +10,8 @@ namespace fs = std::filesystem;
 Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer)
     : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_interval(1000){
 
-                                                                    };
+    }
+                                                        
 
 ErrorCode Model::addDirectory(std::istream &std_input)
 {
@@ -113,3 +114,27 @@ Path_t Model::getMainDirectoryPath()
 {
     return mainDirectoryPath;
 }
+
+/*
+ErrorCode Model::readConfig(){
+
+    read from json:
+    Serializer *config = new SerializerToJSON;
+    config->deserialize();
+    read from txt:
+    Serializer *config = new SerialzerToTxt;
+    config->deserialize();
+
+}
+ErrorCode Model::saveConfig(){
+    save to all:
+    std::vector<Serializer> configurations;
+    configurations.push_back(new SerializerToJSON());
+    configurations.push_back(new SerialzerToTxt());
+
+    for(auto config : configurations){
+        config->serialize();
+    }
+ 
+}
+*/
