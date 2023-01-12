@@ -17,6 +17,8 @@ public:
     virtual void setIntervalTime(std::istream &std_input) = 0;
     virtual void startSync() = 0;
     virtual void forceSync() = 0;
+    virtual void readConfig() = 0;
+    virtual void saveConfig() = 0;
     virtual bool exit() = 0;
 };
 
@@ -34,6 +36,8 @@ public:
         SetIntervalTime = 6,
         StartSync = 7,
         ForceSync = 8,
+        readConfig = 9,
+        saveConfig = 10,
         Exit = 0
     };
 

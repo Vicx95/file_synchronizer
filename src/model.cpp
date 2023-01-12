@@ -115,26 +115,31 @@ Path_t Model::getMainDirectoryPath()
     return mainDirectoryPath;
 }
 
-/*
-ErrorCode Model::readConfig(){
 
-    read from json:
-    Serializer *config = new SerializerToJSON;
-    config->deserialize();
-    read from txt:
-    Serializer *config = new SerialzerToTxt;
-    config->deserialize();
+void Model::readConfig(){
+    std::cout << "debug\n";
+    m_serializer = std::make_unique<SerializerToJSON>(); //new SerializerToJSON();
+    fs::remove_all(std::filesystem::current_path() / "../mainDirectory");
+    fs::create_directory(std::filesystem::current_path() / "../mainDirectory");
+    auto [dirs, files] = m_serializer->deserialize();
 
-}
-ErrorCode Model::saveConfig(){
-    save to all:
-    std::vector<Serializer> configurations;
-    configurations.push_back(new SerializerToJSON());
-    configurations.push_back(new SerialzerToTxt());
-
-    for(auto config : configurations){
-        config->serialize();
+    for(auto dir : dirs){
+        fs::create_directory(std::filesystem::current_path() / dir);
+        std::filesystem::copy(std::filesystem::current_path() / "../configDirectory" / dir, std::filesystem::current_path() / "../mainDirectory" / dir, std::filesystem::copy_options::recursive);
+        std::cout << dir << std::endl;
+    
     }
- 
+
 }
-*/
+
+void Model::saveConfig(){
+    fs::remove_all(std::filesystem::current_path() / "../configDirectory");
+    std::filesystem::copy(std::filesystem::current_path() / "../mainDirectory", std::filesystem::current_path() / "../configDirectory", std::filesystem::copy_options::recursive);
+    std::vector<std::unique_ptr<Serializer>> configurations;
+    configurations.emplace_back(std::make_unique<SerializerToJSON>());
+    configurations.emplace_back(std::make_unique<SerializerToTxt>());
+
+    for(auto const& config : configurations){
+        config->serialize();
+    }    
+}

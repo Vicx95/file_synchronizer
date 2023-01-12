@@ -39,16 +39,16 @@ void Controller::forceSync()
 {
     // m_model->forceSync();
 }
-/*
+
 void Controller::readConfig()
 {
-    // m_model->readConfig();
+    m_model->readConfig();
 }
 void Controller::saveConfig()
 {
-    // m_model->saveConfig();
+    m_model->saveConfig();
 }
-*/
+
 bool Controller::exit()
 {
     return true;

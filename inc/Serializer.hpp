@@ -1,9 +1,12 @@
+#pragma once
+
 #include "../inc/nlohmann/json.hpp"
 #include "../inc/Scanner.hpp"
+#include <set>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
-
+using DirsAndFiles = std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>>;
 
 class Serializer {
 
@@ -11,20 +14,21 @@ class Serializer {
 public:
 
     virtual void serialize() = 0;
-    virtual void deserialize() = 0;
+    virtual DirsAndFiles deserialize() = 0;
+    virtual ~Serializer() {}
 };
 
 class SerializerToJSON : public Serializer{
-Scanner m_scanner;
+    Scanner m_scanner;
 public:
     void serialize();
-    void deserialize();
-    void readConfig();
-    void saveConfig();
+    DirsAndFiles deserialize();
+
 };
 
 class SerializerToTxt : public Serializer{
+    Scanner m_scanner;
 public:
     void serialize();
-    void deserialize();
+    DirsAndFiles deserialize();
 };

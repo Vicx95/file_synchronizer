@@ -113,7 +113,7 @@ void View::printFiles()
 void View::run()
 {
     std::string inputKey;
-    std::regex keyRegex("([0-8]{1})");
+    std::regex keyRegex("([0-9]{1})");
 
     while (!m_isExitRequested)
     {
@@ -159,6 +159,12 @@ void View::run()
             break;
         case Action::ForceSync:
             listener->forceSync();
+            break;
+        case Action::readConfig:
+            listener->readConfig();
+            break;
+        case Action::saveConfig:
+            listener->saveConfig();
             break;
         case Action::Exit:
             m_isExitRequested = listener->exit();

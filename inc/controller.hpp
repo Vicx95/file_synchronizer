@@ -16,6 +16,8 @@ public:
     virtual void setIntervalTime(std::istream &std_input) override;
     virtual void startSync() override;
     virtual void forceSync() override;
+    virtual void readConfig() override;
+    virtual void saveConfig() override;
     virtual bool exit() override;
 
 private:

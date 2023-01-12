@@ -2,6 +2,7 @@
 
 #include "FileSynchronizer.hpp"
 #include "timer.hpp"
+#include "Serializer.hpp"
 #include <filesystem>
 
 using Path_t = std::filesystem::path;
@@ -24,6 +25,8 @@ public:
     ErrorCode removeDirectory();
     ErrorCode removeFile();
     void startSync();
+    void readConfig();
+    void saveConfig();
     Path_t getMainDirectoryPath();
 
 private:
@@ -31,6 +34,7 @@ private:
 
     i_Timer *m_syncTimer;
     i_FileSynchronizer *m_fileSynchronizer;
-
+    //Serializer *m_serializer;
+    std::unique_ptr<Serializer> m_serializer;
     std::chrono::duration<int64_t, std::milli> m_interval;
 };

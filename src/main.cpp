@@ -14,7 +14,7 @@
 
 int main()
 {
-    /*
+    
     Timer tm;
     View v;
     Scanner scanner;
@@ -24,8 +24,13 @@ int main()
     Controller c(&v, &m);
     v.setListener(&c);
     v.run();
-    */
-   SerializerToJSON j;
-   j.serialize();
-   j.deserialize();
+    
+  // SerializerToJSON j;
+   //j.serialize();
+   //j.deserialize();
+   //j.saveConfig();
+  // j.readConfig();
+  // SerializerToTxt t;
+  // t.serialize();
+  // t.deserialize();
 }
