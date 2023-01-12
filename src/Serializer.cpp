@@ -33,14 +33,6 @@ void SerializerToJSON::serialize(){
     }
         DirAndFiles.insert(std::make_pair(dir, files));
 
-/*  DEBUG
-    for(auto el : DirAndFiles){
-        std::cout << "Dir: " << el.first << std::endl;
-        for(auto x : el.second){
-            std::cout << "file: " << x << std::endl;
-        }
-    }
- */   
    for(const auto& dirAndFile : DirAndFiles){
         config[dirAndFile.first] = dirAndFile.second;
     }
@@ -53,7 +45,6 @@ void SerializerToJSON::serialize(){
 DirsAndFiles SerializerToJSON::deserialize(){
     std::ifstream config("../config.json");
     json dirAndFilesJSON = json::parse(config);
-    //std::cout << dirAndFilesJSON << std::endl; 
     std::vector<std::string> Dirs;
     std::vector<std::vector<std::string>> files;
 
@@ -66,37 +57,7 @@ DirsAndFiles SerializerToJSON::deserialize(){
         files.push_back(filesInDir);
     }
 return {std::make_pair(Dirs, files)};
-/* DEBUG
-    for(auto filesInDir : files){
-        for(auto file : filesInDir){
-            std::cout << "File: " << file << std::endl;
-        }
-        std::cout << "\n";
-    }
-*/
 }
-/*
-void SerializerToJSON::readConfig()
-{
-    fs::remove_all(std::filesystem::current_path() / "../mainDirectory");
-    fs::create_directory(std::filesystem::current_path() / "../mainDirectory");
-    fs::current_path(std::filesystem::current_path() / "../mainDirectory");  
-    auto [dirs, files] = deserialize();
-
-    for(auto dir : dirs){
-        fs::create_directory(std::filesystem::current_path() / dir);
-        std::filesystem::copy(std::filesystem::current_path() / "../configDirectory" / dir, std::filesystem::current_path() / "../mainDirectory" / dir, std::filesystem::copy_options::recursive);
-        std::cout << dir << std::endl;
-    
-    }
-
-}
-void SerializerToJSON::saveConfig()
-{
-    std::filesystem::copy(std::filesystem::current_path() / "../mainDirectory", std::filesystem::current_path() / "../configDirectory", std::filesystem::copy_options::recursive);
-    serialize();
-}
-*/
 
 
 void SerializerToTxt::serialize(){

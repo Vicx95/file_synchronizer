@@ -34,7 +34,6 @@ private:
 
     i_Timer *m_syncTimer;
     i_FileSynchronizer *m_fileSynchronizer;
-    //Serializer *m_serializer;
     std::unique_ptr<Serializer> m_serializer;
     std::chrono::duration<int64_t, std::milli> m_interval;
 };

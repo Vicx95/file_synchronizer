@@ -25,12 +25,4 @@ int main()
     v.setListener(&c);
     v.run();
     
-  // SerializerToJSON j;
-   //j.serialize();
-   //j.deserialize();
-   //j.saveConfig();
-  // j.readConfig();
-  // SerializerToTxt t;
-  // t.serialize();
-  // t.deserialize();
 }
