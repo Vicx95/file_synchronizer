@@ -51,5 +51,6 @@ void Controller::saveConfig()
 
 bool Controller::exit()
 {
+    m_model->stopSync();
     return true;
 }

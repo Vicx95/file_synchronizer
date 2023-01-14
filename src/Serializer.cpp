@@ -8,16 +8,16 @@
 
 void SerializerToJSON::serialize(){
 
-    auto configOutputVector = m_scanner.scanForChangedDirs(std::filesystem::current_path() / "../mainDirectory");
+    auto configOutputVector = m_scanner.getRecentScanning();
     json config;
     std::set<std::pair<std::string, std::set<std::string>>> DirAndFiles;
     std::string dir;
     std::set<std::string> files;
-    std::vector<PathAndTime>::iterator it = configOutputVector.begin();
+    std::vector<PathTimePair_t>::iterator it = configOutputVector.begin();
 
     for(const auto& output : configOutputVector){
         auto nx = std::next(it, 1);
-        PathAndTime nextVlue = *nx;
+        PathTimePair_t nextVlue = *nx;
         if(fs::is_directory(output.first)){
             dir = output.first.filename();
         }
@@ -61,15 +61,15 @@ return {std::make_pair(Dirs, files)};
 
 
 void SerializerToTxt::serialize(){
-    auto configOutputVector = m_scanner.scanForChangedDirs(std::filesystem::current_path() / "../mainDirectory");
+    auto configOutputVector = m_scanner.getRecentScanning();
     std::set<std::pair<std::string, std::set<std::string>>> DirAndFiles;
     std::string dir;
     std::set<std::string> files;
-    std::vector<PathAndTime>::iterator it = configOutputVector.begin();
+    std::vector<PathTimePair_t>::iterator it = configOutputVector.begin();
 
     for(const auto& output : configOutputVector){
         auto nx = std::next(it, 1);
-        PathAndTime nextVlue = *nx;
+        PathTimePair_t nextVlue = *nx;
         if(fs::is_directory(output.first)){
             dir = output.first.filename();
         }
