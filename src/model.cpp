@@ -121,6 +121,17 @@ void Model::stopSync()
     m_syncTimer->stop();
 }
 
+void Model::forceSync()
+{
+        m_scanner->scan(m_mainDirectoryPath);
+        auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
+        m_fileSynchronizer->synchronizeAdded(outputComparing.first);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+        m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+
+}
+
 fs::path Model::getMainDirectoryPath()
 {
     return m_mainDirectoryPath;
@@ -128,7 +139,6 @@ fs::path Model::getMainDirectoryPath()
 
 
 void Model::readConfig(){
-    std::cout << "debug\n";
     m_serializer = std::make_unique<SerializerToJSON>(); //new SerializerToJSON();
     fs::remove_all(std::filesystem::current_path() / "../mainDirectory");
     fs::create_directory(std::filesystem::current_path() / "../mainDirectory");

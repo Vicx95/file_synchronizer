@@ -25,6 +25,7 @@ public:
     void setIntervalTime(std::istream &std_input);
     void startSync();
     void stopSync();
+    void forceSync();
     void readConfig();
     void saveConfig();
     fs::path getMainDirectoryPath();

@@ -25,7 +25,7 @@ void Controller::printDirectory()
 }
 void Controller::printFiles()
 {
-    m_view->printDirectory();
+    m_view->printFiles();
 }
 void Controller::setIntervalTime(std::istream &std_input)
 {
@@ -35,9 +35,13 @@ void Controller::startSync()
 {
     m_model->startSync();
 }
+void Controller::stopSync()
+{
+    m_model->stopSync();
+}
 void Controller::forceSync()
 {
-    // m_model->forceSync();
+     m_model->forceSync();
 }
 
 void Controller::readConfig()
