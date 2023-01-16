@@ -15,35 +15,15 @@ void View::setListener(i_ViewListener *listener)
     this->listener = listener;
 }
 
-void View::printMenu()
-{
-    std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";
+i_ViewListener* View::getListener(){
+    return listener;
 }
 
-void View::printOptions()
-{
-    std::cout << "0. Exit \n-------------------------\n"
-              << "1. Add new directory \n"
-              << "2. Remove directory \n"
-              << "3. Remove file \n"
-              << "4. Print all directories \n"
-              << "5. Print all files \n"
-              << "6. Set interval time  \n"
-              << "7. Start sync-up  \n"
-              << "8. Stop sync-up  \n"  
-              << "9. Force sync-up  \n"
-              << "10. Read config  \n"
-              << "11. Save config  \n";
-}
-
-void View::waitForButton()
-{
-    std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
-}
 
 void View::printDirectory()
 {
-
+    ui->printDirectory();
+    /*
     fs::current_path(mainDirectoryPath);
     std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
 
@@ -53,7 +33,8 @@ void View::printDirectory()
     }
     if (fs::is_empty(mainDirectoryPath))
         std::cout << "Folder is empty...\n";
-    waitForButton();
+    //waitForButton();
+    */
 }
 
 bool View::validateForPrinting(std::string name)
@@ -65,12 +46,12 @@ bool View::validateForPrinting(std::string name)
     if (!fs::exists(fs::current_path() / name))
     {
         std::cout << "Not exist file or directory\n";
-        waitForButton();
+        //waitForButton();
         return false;
     }
     return true;
 }
-
+/*
 void View::printFiles()
 {
     std::set<fs::path> sorted_by_name;
@@ -107,78 +88,26 @@ void View::printFiles()
             std::cout << "Folder is empty...";
 
         std::cout << "\n";
-        waitForButton();
+        //waitForButton();
     }
 }
-
+*/
 void View::run()
 {
-    std::string inputKey;
-    std::regex keyRegex("([0-9]{1})");
-
-    while (!m_isExitRequested)
-    {
-        printMenu();
-        printOptions();
-
-        std::cin.clear();
-        std::cin >> inputKey;
-
-        if (!std::regex_search(inputKey, keyRegex))
-        {
-            std::cout << "Incorrect action selected! Please try again...\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            //usleep(1000000); // would be nice to replace it with std::this_thread::sleep_for()
-            continue;
-        }
-
-        switch (static_cast<Action>(std::stoul(inputKey)))
-        {
-        case Action::AddDir:
-            listener->addDirectory(std::cin);
-            break;
-        case Action::RemoveDir:
-            listener->removeDirectory();
-            break;
-        case Action::RemoveFile:
-            listener->removeFile();
-            break;
-        case Action::PrintDir:
-            listener->printDirectory();
-            break;
-        case Action::PrintFiles:
-            listener->printFiles();
-            break;
-        case Action::SetIntervalTime:
-            listener->setIntervalTime(std::cin);
-            break;
-        case Action::StartSync:
-            listener->startSync();
-            break;
-        case Action::StopSync:
-            listener->stopSync();
-            break;
-        case Action::ForceSync:
-            listener->forceSync();
-            break;
-        case Action::readConfig:
-            listener->readConfig();
-            break;
-        case Action::saveConfig:
-            listener->saveConfig();
-            break;
-        case Action::Exit:
-            m_isExitRequested = listener->exit();
-            break;
-        default:
-            std::cout << "Incorrect action selected! Please try again...\n";
-            waitForButton();
-            break;
-        }
-    }
+    ui->run();
 }
 
 void View::setMainDirectoryPath(const fs::path &path)
 {
     mainDirectoryPath = path;
+}
+
+fs::path View::getMainDirectoryPath()
+{
+    return mainDirectoryPath;
+}
+
+View::View()
+{
+    //ui = std::make_unique<ConsoleUserInterface>();
 }

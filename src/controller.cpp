@@ -25,7 +25,7 @@ void Controller::printDirectory()
 }
 void Controller::printFiles()
 {
-    m_view->printFiles();
+    //m_view->printFiles();
 }
 void Controller::setIntervalTime(std::istream &std_input)
 {
@@ -55,6 +55,7 @@ void Controller::saveConfig()
 
 bool Controller::exit()
 {
+    std::cout << "here";
     m_model->stopSync();
     return true;
 }

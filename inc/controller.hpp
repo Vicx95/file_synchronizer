@@ -2,6 +2,7 @@
 
 #include "model.hpp"
 #include "view.hpp"
+#include "i_ViewListener.hpp"
 
 class Controller : public i_ViewListener
 {

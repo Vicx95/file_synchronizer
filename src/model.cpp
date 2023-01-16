@@ -38,7 +38,7 @@ ErrorCode Model::addDirectory(std::istream &std_input)
     else
     {
         std::cout << "Dir already exist...\n";
-        View::waitForButton();
+        ConsoleUserInterface::waitForButton();
         return ErrorCode::FAIL;
     }
 }
@@ -60,7 +60,7 @@ bool Model::validateForRemoval(std::string name)
     if (!fs::exists(fs::current_path() / name))
     {
         std::cout << "Not exist file or directory\n";
-        View::waitForButton();
+        ConsoleUserInterface::waitForButton();
         return false;
     }
     return true;
