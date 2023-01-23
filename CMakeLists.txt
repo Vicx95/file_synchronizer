@@ -19,7 +19,7 @@ set(SOURCES
     src/model.cpp
     src/view.cpp
     src/timer.cpp
-    src/FileSynchronizer.cpp 
+    src/FileSynchronizer.cpp
     src/Scanner.cpp
     src/Serializer.cpp
     )
@@ -33,6 +33,13 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 set(UT-SOURCES 
     tests/main.cpp
+    src/controller.cpp
+    src/model.cpp
+    src/view.cpp
+    src/timer.cpp
+    src/FileSynchronizer.cpp
+    src/Scanner.cpp
+    src/Serializer.cpp
     )
 
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})

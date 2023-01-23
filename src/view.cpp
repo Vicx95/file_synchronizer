@@ -9,7 +9,6 @@
 
 namespace fs = std::filesystem;
 
-
 void View::setListener(i_ViewListener *listener)
 {
     this->listener = listener;
@@ -30,7 +29,7 @@ void View::printOptions()
               << "5. Print all files \n"
               << "6. Set interval time  \n"
               << "7. Start sync-up  \n"
-              << "8. Stop sync-up  \n"  
+              << "8. Stop sync-up  \n"
               << "9. Force sync-up  \n"
               << "10. Read config  \n"
               << "11. Save config  \n";
@@ -128,7 +127,6 @@ void View::run()
         {
             std::cout << "Incorrect action selected! Please try again...\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            //usleep(1000000); // would be nice to replace it with std::this_thread::sleep_for()
             continue;
         }
 
