@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scanner.hpp"
+#include "scanner.hpp"
 #include "timer.hpp"
 
 class i_FileSynchronizer

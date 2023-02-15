@@ -1,4 +1,4 @@
-#include "..//inc/FileSynchronizer.hpp"
+#include "..//inc/file_synchronizer.hpp"
 
 #include <iostream>
 

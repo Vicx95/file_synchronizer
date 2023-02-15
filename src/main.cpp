@@ -1,10 +1,10 @@
-#include "..//inc/FileSynchronizer.hpp"
-#include "..//inc/Scanner.hpp"
+#include "..//inc/file_synchronizer.hpp"
+#include "..//inc/scanner.hpp"
 #include "..//inc/controller.hpp"
 #include "..//inc/model.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
-#include "..//inc/Serializer.hpp"
+#include "..//inc/serializer.hpp"
 
 #include <chrono> // chrono::system_clock
 #include <ctime>

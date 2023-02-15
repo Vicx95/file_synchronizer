@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FileSynchronizer.hpp"
+#include "file_synchronizer.hpp"
 #include "timer.hpp"
-#include "Serializer.hpp"
+#include "serializer.hpp"
 #include <filesystem>
 
 namespace fs = std::filesystem;
