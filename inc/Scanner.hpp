@@ -26,6 +26,8 @@ public:
 
     void printRecentScanResult();
     void printPreviousScanResult();
+    std::vector<PathTimePair_t> getRecentScanning();
+    std::vector<PathTimePair_t> getPreviousScanning();
 
 private:
     std::string convertDateTimeToString(fs::file_time_type ftime);

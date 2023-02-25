@@ -4,6 +4,7 @@
 #include "..//inc/model.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
+#include "..//inc/Serializer.hpp"
 
 #include <chrono> // chrono::system_clock
 #include <ctime>
@@ -13,6 +14,7 @@
 
 int main()
 {
+    
     Timer tm;
     View v;
     Scanner scanner;
@@ -22,4 +24,5 @@ int main()
     Controller c(&v, &m);
     v.setListener(&c);
     v.run();
+    
 }

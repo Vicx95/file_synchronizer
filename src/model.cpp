@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner *scanner)
     : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_scanner(scanner), m_interval(1000){
 
-                                                                                        };
+};
 
 ErrorCode Model::addDirectory(std::istream &std_input)
 {
@@ -121,7 +121,46 @@ void Model::stopSync()
     m_syncTimer->stop();
 }
 
+void Model::forceSync()
+{
+        m_scanner->scan(m_mainDirectoryPath);
+        auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
+        m_fileSynchronizer->synchronizeAdded(outputComparing.first);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+        m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
+        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+
+}
+
 fs::path Model::getMainDirectoryPath()
 {
     return m_mainDirectoryPath;
+}
+
+
+void Model::readConfig(){
+    m_serializer = std::make_unique<SerializerToJSON>(); //new SerializerToJSON();
+    fs::remove_all(std::filesystem::current_path() / "../mainDirectory");
+    fs::create_directory(std::filesystem::current_path() / "../mainDirectory");
+    auto [dirs, files] = m_serializer->deserialize();
+
+    for(auto dir : dirs){
+        fs::create_directory(std::filesystem::current_path() / dir);
+        std::filesystem::copy(std::filesystem::current_path() / "../configDirectory" / dir, std::filesystem::current_path() / "../mainDirectory" / dir, std::filesystem::copy_options::recursive);
+        std::cout << dir << std::endl;
+    
+    }
+
+}
+
+void Model::saveConfig(){
+    fs::remove_all(std::filesystem::current_path() / "../configDirectory");
+    std::filesystem::copy(std::filesystem::current_path() / "../mainDirectory", std::filesystem::current_path() / "../configDirectory", std::filesystem::copy_options::recursive);
+    std::vector<std::unique_ptr<Serializer>> configurations;
+    configurations.emplace_back(std::make_unique<SerializerToJSON>());
+    configurations.emplace_back(std::make_unique<SerializerToTxt>());
+
+    for(auto const& config : configurations){
+        config->serialize();
+    }    
 }

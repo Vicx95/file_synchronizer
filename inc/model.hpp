@@ -2,6 +2,7 @@
 
 #include "FileSynchronizer.hpp"
 #include "timer.hpp"
+#include "Serializer.hpp"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -24,7 +25,9 @@ public:
     void setIntervalTime(std::istream &std_input);
     void startSync();
     void stopSync();
-
+    void forceSync();
+    void readConfig();
+    void saveConfig();
     fs::path getMainDirectoryPath();
 
 private:
@@ -33,8 +36,8 @@ private:
     i_Timer *m_syncTimer;
     i_FileSynchronizer *m_fileSynchronizer;
     i_Scanner *m_scanner;
+    std::unique_ptr<Serializer> m_serializer;
 
-    std::chrono::duration<int64_t, std::milli>
-        m_interval;
+    std::chrono::duration<int64_t, std::milli> m_interval;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 };

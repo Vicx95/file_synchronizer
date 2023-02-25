@@ -16,7 +16,10 @@ public:
     virtual void printFiles() = 0;
     virtual void setIntervalTime(std::istream &std_input) = 0;
     virtual void startSync() = 0;
+    virtual void stopSync() = 0;    
     virtual void forceSync() = 0;
+    virtual void readConfig() = 0;
+    virtual void saveConfig() = 0;
     virtual bool exit() = 0;
 };
 
@@ -33,7 +36,10 @@ public:
         PrintFiles = 5,
         SetIntervalTime = 6,
         StartSync = 7,
-        ForceSync = 8,
+        StopSync = 8,
+        ForceSync = 9,
+        readConfig = 10,
+        saveConfig = 11,
         Exit = 0
     };
 
