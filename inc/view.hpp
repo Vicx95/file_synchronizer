@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <iostream>
 #include <regex>
+#include <ftxui/dom/table.hpp>      // for Table, TableSelection
 
 namespace fs = std::filesystem;
 
@@ -10,10 +11,10 @@ class i_ViewListener
 {
 public:
     virtual void addDirectory(std::istream &std_input) = 0;
-    virtual void removeDirectory() = 0;
+    virtual void removeDirectory(std::istream &std_input) = 0;
     virtual void removeFile() = 0;
-    virtual void printDirectory() = 0;
-    virtual void printFiles() = 0;
+    virtual std::vector<std::vector<std::string>> printDirectory() = 0;
+    virtual std::vector<std::vector<std::string>> printFiles() = 0;
     virtual void setIntervalTime(std::istream &std_input) = 0;
     virtual void startSync() = 0;
     virtual void stopSync() = 0;    
@@ -47,15 +48,18 @@ public:
     void run();
     void printMenu();
     void printOptions();
-    void printDirectory();
-    void printFiles();
+    std::vector<std::vector<std::string>> printDirectory();
+    std::vector<std::vector<std::string>> printFiles();
     static void waitForButton();
     void setMainDirectoryPath(const fs::path &path);
+    std::string get_permission_string(fs::perms permission);
+    void generateColorTable(ftxui::Table* table);
+    void refreshDir(std::vector<std::string> &dirNames);
 
 private:
     bool validateForPrinting(std::string name);
     fs::path mainDirectoryPath;
 
-    bool m_isExitRequested = false;
+    //bool m_isExitRequested = false;
     i_ViewListener *listener;
 };

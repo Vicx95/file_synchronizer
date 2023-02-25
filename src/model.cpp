@@ -66,13 +66,13 @@ bool Model::validateForRemoval(std::string name)
     return true;
 }
 
-ErrorCode Model::removeDirectory()
+ErrorCode Model::removeDirectory(std::istream &std_input)
 {
     fs::current_path(m_mainDirectoryPath);
     std::cout << "Give folder name to remove: \n";
     std::string dirName;
     std::cin.clear();
-    std::cin >> dirName;
+    std_input >> dirName;
     if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);

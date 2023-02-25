@@ -11,21 +11,21 @@ void Controller::addDirectory(std::istream &std_input)
 {
     m_model->addDirectory(std_input);
 }
-void Controller::removeDirectory()
+void Controller::removeDirectory(std::istream &std_input)
 {
-    m_model->removeDirectory();
+    m_model->removeDirectory(std_input);
 }
 void Controller::removeFile()
 {
     m_model->removeFile();
 }
-void Controller::printDirectory()
+std::vector<std::vector<std::string>> Controller::printDirectory()
 {
-    m_view->printDirectory();
+    return m_view->printDirectory();
 }
-void Controller::printFiles()
+std::vector<std::vector<std::string>> Controller::printFiles()
 {
-    m_view->printFiles();
+    return m_view->printFiles();
 }
 void Controller::setIntervalTime(std::istream &std_input)
 {
