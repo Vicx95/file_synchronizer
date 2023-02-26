@@ -38,7 +38,7 @@ ErrorCode Model::addDirectory(std::istream &std_input)
     else
     {
         std::cout << "Dir already exist...\n";
-        View::waitForButton();
+        ViewConsoleUserInterface::waitForButton();
         return ErrorCode::FAIL;
     }
 }
@@ -60,7 +60,7 @@ bool Model::validateForRemoval(std::string name)
     if (!fs::exists(fs::current_path() / name))
     {
         std::cout << "Not exist file or directory\n";
-        View::waitForButton();
+        ViewConsoleUserInterface::waitForButton();
         return false;
     }
     return true;
@@ -139,23 +139,16 @@ fs::path Model::getMainDirectoryPath()
 
 
 void Model::readConfig(){
-    m_serializer = std::make_unique<SerializerToJSON>(); //new SerializerToJSON();
-    fs::remove_all(std::filesystem::current_path() / "../mainDirectory");
-    fs::create_directory(std::filesystem::current_path() / "../mainDirectory");
+    m_serializer = std::make_unique<SerializerToJSON>(); 
+    fs::remove_all(m_mainDirectoryPath);
+    fs::create_directory(m_mainDirectoryPath);
     auto [dirs, files] = m_serializer->deserialize();
-
-    for(auto dir : dirs){
-        fs::create_directory(std::filesystem::current_path() / dir);
-        std::filesystem::copy(std::filesystem::current_path() / "../configDirectory" / dir, std::filesystem::current_path() / "../mainDirectory" / dir, std::filesystem::copy_options::recursive);
-        std::cout << dir << std::endl;
-    
-    }
-
+    std::filesystem::copy(m_mainDirectoryPath / "../configDirectory", m_mainDirectoryPath, std::filesystem::copy_options::recursive);
 }
 
 void Model::saveConfig(){
     fs::remove_all(std::filesystem::current_path() / "../configDirectory");
-    std::filesystem::copy(std::filesystem::current_path() / "../mainDirectory", std::filesystem::current_path() / "../configDirectory", std::filesystem::copy_options::recursive);
+    std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
     std::vector<std::unique_ptr<Serializer>> configurations;
     configurations.emplace_back(std::make_unique<SerializerToJSON>());
     configurations.emplace_back(std::make_unique<SerializerToTxt>());

@@ -19,14 +19,15 @@ int main()
 {
     
     Timer tm;
-    View v;
+    View* v = new ViewFTXuserInterface();
+    //View* v = new ViewConsoleUserInterface();
     Scanner scanner;
     FileSynchronizer sync;
 
     Model m(&tm, &sync, &scanner);
-    Controller c(&v, &m);
-    v.setListener(&c);
-    v.run();
+    Controller c(v, &m);
+    v->setListener(&c);
+    v->run();
     
 
    

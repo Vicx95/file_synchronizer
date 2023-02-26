@@ -45,21 +45,46 @@ public:
     };
 
     void setListener(i_ViewListener *listener);
-    void run();
-    void printMenu();
-    void printOptions();
-    std::vector<std::vector<std::string>> printDirectory();
-    std::vector<std::vector<std::string>> printFiles();
-    static void waitForButton();
-    void setMainDirectoryPath(const fs::path &path);
-    std::string get_permission_string(fs::perms permission);
-    void generateColorTable(ftxui::Table* table);
-    void refreshDir(std::vector<std::string> &dirNames);
+    virtual void run() = 0;
 
-private:
-    bool validateForPrinting(std::string name);
+    virtual std::vector<std::vector<std::string>> printDirectory() = 0;
+    virtual std::vector<std::vector<std::string>> printFiles() = 0;
+
+    void setMainDirectoryPath(const fs::path &path);
+
+
+protected:
     fs::path mainDirectoryPath;
 
-    //bool m_isExitRequested = false;
+    bool m_isExitRequested = false;
     i_ViewListener *listener;
+};
+
+
+class ViewFTXuserInterface : public View
+{
+    public:
+        void run();
+        std::vector<std::vector<std::string>> printDirectory();
+        std::vector<std::vector<std::string>> printFiles();
+
+        std::string get_permission_string(fs::perms permission);
+        void generateColorTable(ftxui::Table* table);
+        void refreshDir(std::vector<std::string> &dirNames);
+
+};
+
+class ViewConsoleUserInterface : public View
+{
+    public:
+        void run();
+        std::vector<std::vector<std::string>> printDirectory();
+        std::vector<std::vector<std::string>> printFiles();
+
+
+        void printMenu();
+        void printOptions();
+        static void waitForButton();
+        bool validateForPrinting(std::string name);
+
 };

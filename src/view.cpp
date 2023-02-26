@@ -32,12 +32,12 @@ void View::setListener(i_ViewListener *listener)
     this->listener = listener;
 }
 
-void View::printMenu()
+void ViewConsoleUserInterface::printMenu()
 {
     std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";
 }
 
-void View::printOptions()
+void ViewConsoleUserInterface::printOptions()
 {
     std::cout << "0. Exit \n-------------------------\n"
               << "1. Add new directory \n"
@@ -53,12 +53,12 @@ void View::printOptions()
               << "11. Save config  \n";
 }
 
-void View::waitForButton()
+void ViewConsoleUserInterface::waitForButton()
 {
     std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
 }
 
-std::string View::get_permission_string(fs::perms permission) {
+std::string ViewFTXuserInterface::get_permission_string(fs::perms permission) {
   std::stringstream ss;
   ss << ((permission & fs::perms::owner_read) != fs::perms::none ? "r" : "-");
   ss << ((permission & fs::perms::owner_write) != fs::perms::none ? "w" : "-");
@@ -72,22 +72,10 @@ std::string View::get_permission_string(fs::perms permission) {
   return ss.str();
 }
 
-std::vector<std::vector<std::string>> View::printDirectory()
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printDirectory()
 {
-
-    //int counter = 0;
     fs::current_path(mainDirectoryPath);
-    //std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
-/*
-    for (auto const &dirEntry : fs::directory_iterator(mainDirectoryPath))
-    {
-        std::cout << dirEntry.path() << std::endl;
-        counter++;
-    }
-    if (fs::is_empty(mainDirectoryPath))
-        std::cout << "Folder is empty...\n";
-    //waitForButton();
-*/
+
     std::vector<std::vector<std::string>> rows;
     rows.push_back({ "Directory Name", "Modification Time", "Size", "Permissions" });
   
@@ -108,12 +96,32 @@ std::vector<std::vector<std::string>> View::printDirectory()
     }
     std::sort(rows.begin()+1, rows.end());
 
-   // auto table = ftxui::Table(rows);
     return rows;
  
 }
 
-bool View::validateForPrinting(std::string name)
+std::vector<std::vector<std::string>> ViewConsoleUserInterface::printDirectory()
+{
+
+    int counter = 0;
+    fs::current_path(mainDirectoryPath);
+    //std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
+
+    for (auto const &dirEntry : fs::directory_iterator(mainDirectoryPath))
+    {
+        std::cout << dirEntry.path() << std::endl;
+        counter++;
+    }
+    if (fs::is_empty(mainDirectoryPath))
+        std::cout << "Folder is empty...\n";
+    //waitForButton();
+
+
+    return {};
+ 
+}
+
+bool ViewConsoleUserInterface::validateForPrinting(std::string name)
 {
     if (name == "all")
     {
@@ -128,10 +136,39 @@ bool View::validateForPrinting(std::string name)
     return true;
 }
 
-std::vector<std::vector<std::string>> View::printFiles()
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printFiles()
 {
     std::set<fs::path> sorted_by_name;
-    /*
+
+    std::vector<std::vector<std::string>> rows;
+    rows.push_back({ "File Name", "Modification Time", "Size", "Permissions" });
+
+
+    for (auto const &entry : fs::recursive_directory_iterator(mainDirectoryPath))  //directory_iterator
+    {
+        if (entry.is_regular_file()) {
+            auto file = entry.path();
+            auto file_time = fs::last_write_time(file);
+            auto file_size = fs::file_size(file);
+            auto file_perms = fs::status(file).permissions();
+            std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
+            std::string modification_time = std::ctime(&cftime);
+
+            rows.push_back({ file.filename().string(), modification_time, std::to_string(file_size) + "KB", get_permission_string(file_perms) });  //std::to_string(file_perms)
+        }
+    }
+
+
+   // auto table = ftxui::Table(rows);
+    return rows;
+
+
+}
+
+std::vector<std::vector<std::string>> ViewConsoleUserInterface::printFiles()
+{
+    std::set<fs::path> sorted_by_name;
+
     std::cout << "Give folder name or choose 'all' to print files: \n";
     std::string dirName;
     std::cin.clear();
@@ -167,34 +204,11 @@ std::vector<std::vector<std::string>> View::printFiles()
         std::cout << "\n";
         waitForButton();
     }
-    */
-
-    std::vector<std::vector<std::string>> rows;
-    rows.push_back({ "File Name", "Modification Time", "Size", "Permissions" });
-
-
-    for (auto const &entry : fs::recursive_directory_iterator(mainDirectoryPath))  //directory_iterator
-    {
-        if (entry.is_regular_file()) {
-            auto file = entry.path();
-            auto file_time = fs::last_write_time(file);
-            auto file_size = fs::file_size(file);
-            auto file_perms = fs::status(file).permissions();
-            std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
-            std::string modification_time = std::ctime(&cftime);
-
-            rows.push_back({ file.filename().string(), modification_time, std::to_string(file_size) + "KB", get_permission_string(file_perms) });  //std::to_string(file_perms)
-        }
-    }
-
-
-   // auto table = ftxui::Table(rows);
-    return rows;
-
-
+    
+    return {};
 }
 
-void View::generateColorTable(ftxui::Table* table)
+void ViewFTXuserInterface::generateColorTable(ftxui::Table* table)
 {
   table->SelectAll().Border(LIGHT);
  
@@ -217,7 +231,7 @@ void View::generateColorTable(ftxui::Table* table)
   content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
 }
 
-void View::refreshDir(std::vector<std::string> &dirNames)
+void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames)
 {
     dirNames.clear();
     for (auto const &entry : fs::directory_iterator(mainDirectoryPath))  //directory_iterator
@@ -227,9 +241,9 @@ void View::refreshDir(std::vector<std::string> &dirNames)
     std::sort(dirNames.begin(), dirNames.end());
 }
 
-void View::run()
+void ViewConsoleUserInterface::run()
 {
-    /*
+    
     std::string inputKey;
     std::regex keyRegex("([0-9]{1})");
 
@@ -255,7 +269,7 @@ void View::run()
             listener->addDirectory(std::cin);
             break;
         case Action::RemoveDir:
-            listener->removeDirectory();
+            listener->removeDirectory(std::cin);
             break;
         case Action::RemoveFile:
             listener->removeFile();
@@ -293,7 +307,11 @@ void View::run()
             break;
         }
     }
-*/
+}
+
+
+void ViewFTXuserInterface::run()
+{
     int value = 50;
     auto screen = ScreenInteractive::Fullscreen(); //FitComponent();
     bool showTableDir = false;
