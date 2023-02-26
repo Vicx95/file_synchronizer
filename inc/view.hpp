@@ -51,7 +51,7 @@ public:
     virtual std::vector<std::vector<std::string>> printFiles() = 0;
 
     void setMainDirectoryPath(const fs::path &path);
-
+    virtual ~View() {} 
 
 protected:
     fs::path mainDirectoryPath;
@@ -71,7 +71,6 @@ class ViewFTXuserInterface : public View
         std::string get_permission_string(fs::perms permission);
         void generateColorTable(ftxui::Table* table);
         void refreshDir(std::vector<std::string> &dirNames);
-
 };
 
 class ViewConsoleUserInterface : public View

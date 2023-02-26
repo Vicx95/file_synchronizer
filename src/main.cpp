@@ -28,8 +28,6 @@ int main()
     Controller c(v, &m);
     v->setListener(&c);
     v->run();
-    
-
-   
+    delete v;   
 
 }
