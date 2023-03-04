@@ -83,25 +83,40 @@ ErrorCode Model::removeDirectory(std::istream &std_input)
 
 ErrorCode Model::removeFile()
 {
-    std::cout << "Give folder name with files to delete: \n";
-    fs::current_path(m_mainDirectoryPath);
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
-    if (validateForRemoval(dirName))
-    {
-        fs::current_path(m_mainDirectoryPath / dirName);
-        std::cout << "Give file name to remove: \n";
-        std::string fileName;
-        std::cin.clear();
-        std::cin >> fileName;
-        if (validateForRemoval(fileName))
-        {
-            fs::remove(fileName);
-            return ErrorCode::SUCCESS;
+    std::set<std::string> fileNames;
+    for (auto const &fileEntry : fs::recursive_directory_iterator(m_mainDirectoryPath)){
+        if (fileEntry.is_regular_file()){
+            fileNames.insert(fileEntry.path().filename());
         }
     }
-    return ErrorCode::FAIL;
+    std::cout << "List of all files: \n";
+    for(auto const &file : fileNames){
+        std::cout << file << "\n";
+    }
+
+    std::cout << "Select file which you want delete: \n";
+    std::string file;
+    std::cin.clear();
+    std::cin >> file;
+    for (auto dir : fs::directory_iterator(m_mainDirectoryPath)){
+        try
+        {
+            if(fs::exists(dir.path() / file)){
+                fs::remove(dir.path() / file);
+                std::cout << "Removed file in directory:" << dir.path().filename() <<  "\n";
+            }
+            else{
+                std::cout << "Not exist file in directory:" << dir.path().filename() <<  "\n";
+            }
+        }
+        catch (std::exception &e)
+        {
+            std::cout << e.what();
+        }
+    }
+    m_scanner->scan(m_mainDirectoryPath);
+
+    return ErrorCode::SUCCESS;
 }
 
 void Model::startSync()
