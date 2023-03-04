@@ -11,8 +11,8 @@ public:
     virtual void addDirectory(std::istream &std_input) override;
     virtual void removeDirectory(std::istream &std_input) override;
     virtual void removeFile() override;
-    virtual std::vector<std::vector<std::string>> printDirectory() override;
-    virtual std::vector<std::vector<std::string>> printFiles() override;
+    virtual void printDirectory() override;
+    virtual void printFiles() override;
     virtual void setIntervalTime(std::istream &std_input) override;
     virtual void startSync() override;
     virtual void stopSync() override;

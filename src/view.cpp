@@ -72,7 +72,7 @@ std::string ViewFTXuserInterface::get_permission_string(fs::perms permission) {
   return ss.str();
 }
 
-std::vector<std::vector<std::string>> ViewFTXuserInterface::printDirectory()
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printDir()
 {
     fs::current_path(mainDirectoryPath);
 
@@ -100,7 +100,7 @@ std::vector<std::vector<std::string>> ViewFTXuserInterface::printDirectory()
  
 }
 
-std::vector<std::vector<std::string>> ViewConsoleUserInterface::printDirectory()
+void ViewConsoleUserInterface::printDirectory()
 {
 
     int counter = 0;
@@ -114,11 +114,7 @@ std::vector<std::vector<std::string>> ViewConsoleUserInterface::printDirectory()
     }
     if (fs::is_empty(mainDirectoryPath))
         std::cout << "Folder is empty...\n";
-    //waitForButton();
-
-
-    return {};
- 
+    waitForButton(); 
 }
 
 bool ViewConsoleUserInterface::validateForPrinting(std::string name)
@@ -136,7 +132,7 @@ bool ViewConsoleUserInterface::validateForPrinting(std::string name)
     return true;
 }
 
-std::vector<std::vector<std::string>> ViewFTXuserInterface::printFiles()
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printAllFiles()
 {
     std::set<fs::path> sorted_by_name;
 
@@ -158,14 +154,10 @@ std::vector<std::vector<std::string>> ViewFTXuserInterface::printFiles()
         }
     }
 
-
-   // auto table = ftxui::Table(rows);
     return rows;
-
-
 }
 
-std::vector<std::vector<std::string>> ViewConsoleUserInterface::printFiles()
+void ViewConsoleUserInterface::printFiles()
 {
     std::set<fs::path> sorted_by_name;
 
@@ -204,8 +196,6 @@ std::vector<std::vector<std::string>> ViewConsoleUserInterface::printFiles()
         std::cout << "\n";
         waitForButton();
     }
-    
-    return {};
 }
 
 void ViewFTXuserInterface::generateColorTable(ftxui::Table* table)
@@ -318,37 +308,36 @@ void ViewFTXuserInterface::run()
     bool showTableFile = false; 
     bool showAddDir = false; 
     bool showRemoveDir = false;
- //   std::string first_name;
- //   Component input_first_name = Input(&first_name, "Directory name");
+    bool showSetIntVal = false;
+
+
+
+//---------------------------------------------------------------------
+//Buttons on the screen
+//---------------------------------------------------------------------
   // The tree of components. This defines how to navigate using the keyboard.
   auto buttons = Container::Horizontal({
-      Button("Add dir", [&] { /*c.addDirectory(std::cin); */ showAddDir = true; showRemoveDir = false; }),
-      Button("Remove Dir", [&] { /*c.removeDirectory(); */ showRemoveDir = true; showTableDir = false; showTableFile = false; showAddDir = false;}),
+      Button("Add dir", [&] { /*c.addDirectory(std::cin); */ showAddDir = true; showRemoveDir = false; showSetIntVal = false;}),
+      Button("Remove Dir", [&] { /*c.removeDirectory(); */ showRemoveDir = true; showTableDir = false; showTableFile = false; showAddDir = false; showSetIntVal = false;}),
       Button("Remove File", [&] { /*c.removeFile(); */}),
-      Button("Print Dirs", [&] { /*listener->printDirectory();*/ showTableDir = true; showTableFile = false; showRemoveDir=false; showAddDir =false;}),
-      Button("Print files", [&] { /*c.printFiles(); */ showTableFile = true; showTableDir = false; showAddDir = false;}),
-      Button("Set int-val", [&] { /*c.setIntervalTime(std::cin); */}),
-      Button("Start sync-up", [&] { /*c.startSync(); */ showTableDir = false; showTableFile = false; showAddDir = false; }),
-      Button("Stop sync-up", [&] { /*c.stopSync(); */}),
-      Button("Force sync-up", [&] { /*c.forceSync(); */}),
-      Button("Read config", [&] { /*c.readConfig(); */}),
-      Button("Save config", [&] { /*c.saveConfig();*/ }),
+      Button("Print Dirs", [&] { /*listener->printDirectory();*/ showTableDir = true; showTableFile = false; showRemoveDir=false; showAddDir =false; showSetIntVal = false;}),
+      Button("Print files", [&] { /*c.printFiles(); */ showTableFile = true; showTableDir = false; showAddDir = false; showSetIntVal = false;}),
+      Button("Set int-val", [&] { /*c.setIntervalTime(std::cin); */ showSetIntVal = true; showTableDir = false; showTableFile = false; showRemoveDir=false; showAddDir =false;}),
+      Button("Start sync-up", [&] { listener->startSync(); showTableDir = false; showTableFile = false; showAddDir = false; showSetIntVal = false; }),
+      Button("Stop sync-up", [&] { listener->stopSync(); }),
+      Button("Force sync-up", [&] { listener->forceSync();}),
+      Button("Read config", [&] { listener->readConfig(); }),
+      Button("Save config", [&] { listener->saveConfig(); }),
       Button("Exit", [&] {screen.Exit();})
 
   });
 
-/*
-    ftxui::Table table = Table({
-      {"Position", "Marketing name", "Release date", "API level", "Runtime"},
-      {"1", "Gingerbread", "February 9 2011", "10", "Dalvik"},
-      {"2", "Ice Cream Sandwich", "October 19 2011", "15", "Dalvik"},
-      {"3", "Jelly Bean", "July 9 2012", "16", "Dalvik"},
-      {"4", "Jelly Bean", "November 13 2012", "17", "Dalvik"},
-      {"5", "Jelly Bean", "July 24 2013", "18", "Dalvik"},
-    });
- */
-  ftxui::Table tableDirs = listener->printDirectory();
-  ftxui::Table tableFiles = listener->printFiles();
+
+//---------------------------------------------------------------------
+// Print directory and files
+//---------------------------------------------------------------------
+  ftxui::Table tableDirs = printDir();//listener->printDirectory();
+  ftxui::Table tableFiles = printAllFiles();//listener->printFiles();
 //std::vector<ftxui::Table*> Tables {&tableDirs, &tableFiles };
     generateColorTable(&tableDirs);
     generateColorTable(&tableFiles);
@@ -356,7 +345,9 @@ void ViewFTXuserInterface::run()
 
   Element printDirTable = tableDirs.Render();
   Element printFilesTable = tableFiles.Render();
-
+//----------------------------------------------------------------------
+// Print logo-graph
+//----------------------------------------------------------------------
   Element document = graph([](int x, int y) {
     std::vector<int> result(50, 0);
     for (int i=0; i < x; ++i) {
@@ -402,14 +393,30 @@ auto input_option = InputOption();
     input_add_content = "";
     enterInputDir = true;
   };
-  Component input_add = Input(&input_add_content, "input directory", input_option);
+  Component inputAdd = Input(&input_add_content, "input directory", input_option);
 //---------------------------------------------------------------------
+// Set int-val
+//---------------------------------------------------------------------
+unsigned int interval = 5000;
+std::stringstream setInterval(interval);
+ 
+  // The tree of components. This defines how to navigate using the keyboard.
+  auto IntervalButtons = Container::Horizontal({
+      Button("Decrease", [&] { interval > 0 ? interval-=1000 : interval = 0;}, ButtonOption::Animated(Color::Red)),
+      Button("Reset", [&] { interval = 5000; }), 
+      Button("Increase", [&] { interval < 60000 ? interval+=1000 : interval = 60000; }, ButtonOption::Animated(Color::Green)),
+      Button("Set", [&] { listener->setIntervalTime(setInterval);}) | flex ,
+  });
+
+//---------------------------------------------------------------------
+
 
 Component container = Container::Horizontal({
       buttons,
       //input_first_name,
-      input_add,
+      inputAdd,
       inputRemove,
+      IntervalButtons,
   });
 
  auto render_command = [&] {
@@ -418,30 +425,24 @@ Component container = Container::Horizontal({
     for (auto& it : input_entries) {
       line.push_back(text(" " + it) | color(Color::RedLight));
       //Add directory 
-       std::stringstream ff(input_entries.back());
+       std::stringstream InputDirName(input_entries.back());
        if(enterInputDir){
            enterInputDir = false;
-           listener->addDirectory(ff);
+           listener->addDirectory(InputDirName);
            refreshDir(dirNames);
        }
-        tableDirs = listener->printDirectory();
+        tableDirs = printDir(); //listener->printDirectory();
         generateColorTable(&tableDirs);
         printDirTable = tableDirs.Render();
-
-        //Remove directory
-        /*
-        if(enterRemoveDir){
-            enterRemoveDir = false;
-            std::stringstream rmStream(*(dirNames.begin()+dirSelected));
-            listener->removeDirectory(rmStream);
-            dirNames.erase(dirNames.begin()+dirSelected);
-       }
-       */
     }
     
     return line;
   };
 
+
+//---------------------------------------------------------------------
+// Render screen
+//---------------------------------------------------------------------
   // Modify the way to render them on screen:
   auto component = Renderer( container, [&] {
     return vbox({
@@ -452,17 +453,16 @@ Component container = Container::Horizontal({
                buttons->Render() | color(Color::Orange1),
                separator(),
                document,
-               //separator(),
-              // printDirTable | hcenter,
                showTableDir ?  printDirTable | hcenter : emptyElement(),
                showTableFile ? printFilesTable | hcenter : emptyElement(),
                showAddDir ?
                vbox({ 
                separator(),
-               hbox(text(" Input directory name: "), input_add->Render()),
+               hbox(text(" Input directory name: "), inputAdd->Render()),
                hflow(render_command()) | flex_grow,
                }) : emptyElement(),
                showRemoveDir ?  inputRemove->Render() | vscroll_indicator | frame |   size(HEIGHT, EQUAL, 3) | flex : emptyElement(),
+               showSetIntVal ?  vbox({ text("Interval time value [milliseconds]: " + std::to_string(interval)), separator(), gauge(interval * 0.0000165f), separator(), IntervalButtons->Render(), }) | hcenter : emptyElement(),
            }) |
            border;
   });
@@ -474,4 +474,14 @@ Component container = Container::Horizontal({
 void View::setMainDirectoryPath(const fs::path &path)
 {
     mainDirectoryPath = path;
+}
+
+void ViewFTXuserInterface::printFiles()
+{
+
+}
+
+void ViewFTXuserInterface::printDirectory()
+{
+
 }

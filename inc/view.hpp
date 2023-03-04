@@ -13,8 +13,8 @@ public:
     virtual void addDirectory(std::istream &std_input) = 0;
     virtual void removeDirectory(std::istream &std_input) = 0;
     virtual void removeFile() = 0;
-    virtual std::vector<std::vector<std::string>> printDirectory() = 0;
-    virtual std::vector<std::vector<std::string>> printFiles() = 0;
+    virtual void printDirectory() = 0;
+    virtual void printFiles() = 0;
     virtual void setIntervalTime(std::istream &std_input) = 0;
     virtual void startSync() = 0;
     virtual void stopSync() = 0;    
@@ -47,8 +47,8 @@ public:
     void setListener(i_ViewListener *listener);
     virtual void run() = 0;
 
-    virtual std::vector<std::vector<std::string>> printDirectory() = 0;
-    virtual std::vector<std::vector<std::string>> printFiles() = 0;
+    virtual void printDirectory() = 0;
+    virtual void printFiles() = 0;
 
     void setMainDirectoryPath(const fs::path &path);
     virtual ~View() {} 
@@ -65,8 +65,11 @@ class ViewFTXuserInterface : public View
 {
     public:
         void run();
-        std::vector<std::vector<std::string>> printDirectory();
-        std::vector<std::vector<std::string>> printFiles();
+        void printDirectory();
+        void printFiles();
+        
+        std::vector<std::vector<std::string>> printDir();
+        std::vector<std::vector<std::string>> printAllFiles();
 
         std::string get_permission_string(fs::perms permission);
         void generateColorTable(ftxui::Table* table);
@@ -77,10 +80,8 @@ class ViewConsoleUserInterface : public View
 {
     public:
         void run();
-        std::vector<std::vector<std::string>> printDirectory();
-        std::vector<std::vector<std::string>> printFiles();
-
-
+        void printDirectory();
+        void printFiles();
         void printMenu();
         void printOptions();
         static void waitForButton();

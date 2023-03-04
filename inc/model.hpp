@@ -26,9 +26,11 @@ public:
     void startSync();
     void stopSync();
     void forceSync();
-    void readConfig();
+    void readConfig(std::istream &std_input);
     void saveConfig();
+    void addConfig(std::istream &std_input);
     fs::path getMainDirectoryPath();
+    bool m_syncStarted = false;
 
 private:
     bool validateForRemoval(std::string name);

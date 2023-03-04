@@ -19,13 +19,13 @@ void Controller::removeFile()
 {
     m_model->removeFile();
 }
-std::vector<std::vector<std::string>> Controller::printDirectory()
+void Controller::printDirectory()
 {
-    return m_view->printDirectory();
+    m_view->printDirectory();
 }
-std::vector<std::vector<std::string>> Controller::printFiles()
+void Controller::printFiles()
 {
-    return m_view->printFiles();
+    m_view->printFiles();
 }
 void Controller::setIntervalTime(std::istream &std_input)
 {
@@ -46,7 +46,7 @@ void Controller::forceSync()
 
 void Controller::readConfig()
 {
-    m_model->readConfig();
+    m_model->readConfig(std::cin);
 }
 void Controller::saveConfig()
 {
