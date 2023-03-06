@@ -22,9 +22,14 @@ set(SOURCES
     src/FileSynchronizer.cpp
     src/Scanner.cpp
     src/Serializer.cpp
+    #src/ThreadPool.cpp
     )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+set(HEADERS 
+    inc/ThreadPool.hpp
+    )
+
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 
@@ -40,6 +45,7 @@ set(UT-SOURCES
     src/FileSynchronizer.cpp
     src/Scanner.cpp
     src/Serializer.cpp
+    src/ThreadPool.cpp
     )
 
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})
