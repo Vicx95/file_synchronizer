@@ -1,4 +1,7 @@
-#include "..//inc/Serializer.hpp"
+#include "..//inc/serializer.hpp"
+#include <vector>
+#include <fstream>
+#include <sstream>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

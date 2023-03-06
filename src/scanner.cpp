@@ -1,4 +1,4 @@
-#include "..//inc/Scanner.hpp"
+#include "..//inc/scanner.hpp"
 #include <chrono>
 #include <ctime>
 #include <filesystem>
