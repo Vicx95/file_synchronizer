@@ -19,9 +19,9 @@ set(SOURCES
     src/model.cpp
     src/view.cpp
     src/timer.cpp
-    src/FileSynchronizer.cpp
-    src/Scanner.cpp
-    src/Serializer.cpp
+    src/file_synchronizer.cpp
+    src/scanner.cpp
+    src/serializer.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -32,18 +32,12 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 set(UT-SOURCES 
-    tests/main.cpp
-    src/controller.cpp
-    src/model.cpp
-    src/view.cpp
-    src/timer.cpp
-    src/FileSynchronizer.cpp
-    src/Scanner.cpp
-    src/Serializer.cpp
+    tests/model_ut.cpp
     )
 
+add_library(${PROJECT_NAME}-lib STATIC ${SOURCES})
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})
 link_libraries(gmock)
-target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock nlohmann_json::nlohmann_json ${PROJECT_NAME}-lib)
 target_compile_options(${PROJECT_NAME}-ut PRIVATE ${FLAGS})
 add_test(NAME ${PROJECT_NAME}-test COMMAND ${PROJECT_NAME}-ut)

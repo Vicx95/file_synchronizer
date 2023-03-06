@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../inc/nlohmann/json.hpp"
-#include "../inc/Scanner.hpp"
+#include "../inc/scanner.hpp"
 #include <set>
 
 using json = nlohmann::json;
