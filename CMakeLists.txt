@@ -22,6 +22,7 @@ set(SOURCES
     src/file_synchronizer.cpp
     src/scanner.cpp
     src/serializer.cpp
+    src/logger.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

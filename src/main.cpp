@@ -5,6 +5,7 @@
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
 #include "..//inc/serializer.hpp"
+#include "..//inc/logger.hpp"
 
 #include <chrono> // chrono::system_clock
 #include <ctime>
@@ -14,7 +15,7 @@
 
 int main()
 {
-    
+    LOG_INFO("Synchronizer starting");
     Timer tm;
     View v;
     Scanner scanner;

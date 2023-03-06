@@ -1,4 +1,5 @@
 #include "..//inc/controller.hpp"
+#include "..//inc/logger.hpp"
 
 Controller::Controller(View *view, Model *model)
     : m_view(view), m_model(model)
@@ -55,6 +56,7 @@ void Controller::saveConfig()
 
 bool Controller::exit()
 {
+    LOG_INFO("Stopping synchronizer");
     m_model->stopSync();
     return true;
 }
