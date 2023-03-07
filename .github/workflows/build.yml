@@ -14,6 +14,7 @@ jobs:
     - name: Compile
       working-directory: build
       run: |
+        sudo apt-get install -y nlohmann-json3-dev
         cmake ..
         make
     - name: Run tests
