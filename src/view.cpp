@@ -13,10 +13,6 @@
 #include "..//inc/ftxui/screen/screen.hpp"
 #include <ftxui/dom/table.hpp>      // for Table, TableSelection
 
-//ftxui::Table table;
-//ftxui::Text text;
-
-
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  // for Button, Horizontal, Renderer
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
@@ -81,18 +77,15 @@ std::vector<std::vector<std::string>> ViewFTXuserInterface::printDir()
   
 
     for (auto const &entry : fs::directory_iterator(mainDirectoryPath))  //directory_iterator
-    {
-        
-      //  if (entry.is_regular_file()) {
-            auto file = entry.path();
-            auto file_time = fs::last_write_time(file);
-            //auto file_size = 0;//fs::file_size(file);
-            auto file_perms = fs::status(file).permissions();
-            std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
-            std::string modification_time = std::ctime(&cftime);
+    {        
+        auto file = entry.path();
+        auto file_time = fs::last_write_time(file);
+        //auto file_size = 0;//fs::file_size(file);
+        auto file_perms = fs::status(file).permissions();
+        std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
+        std::string modification_time = std::ctime(&cftime);
 
-            rows.push_back({ file.filename().string(), modification_time, std::to_string(0) + " Bytes", get_permission_string(file_perms) });  //std::to_string(file_perms)
-       // }
+        rows.push_back({ file.filename().string(), modification_time, std::to_string(0) + " Bytes", get_permission_string(file_perms) }); 
     }
     std::sort(rows.begin()+1, rows.end());
 
@@ -105,7 +98,6 @@ void ViewConsoleUserInterface::printDirectory()
 
     int counter = 0;
     fs::current_path(mainDirectoryPath);
-    //std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
 
     for (auto const &dirEntry : fs::directory_iterator(mainDirectoryPath))
     {

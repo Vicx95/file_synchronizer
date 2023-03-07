@@ -19,8 +19,8 @@ int main()
 {
     
     Timer tm;
-    View* v = new ViewFTXuserInterface();
-    //View* v = new ViewConsoleUserInterface();
+    //View* v = new ViewFTXuserInterface();
+    View* v = new ViewConsoleUserInterface();
     Scanner scanner;
     FileSynchronizer sync;
 

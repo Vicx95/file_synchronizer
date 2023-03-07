@@ -76,6 +76,7 @@ ErrorCode Model::removeDirectory(std::istream &std_input)
     if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);
+        m_scanner->scan(m_mainDirectoryPath);
         return ErrorCode::SUCCESS;
     }
     return ErrorCode::FAIL;
@@ -99,6 +100,7 @@ ErrorCode Model::removeFile()
     std::cin.clear();
     std::cin >> file;
     for (auto dir : fs::directory_iterator(m_mainDirectoryPath)){
+        std::lock_guard<std::mutex> lock(m_mutex);
         try
         {
             if(fs::exists(dir.path() / file)){
@@ -115,6 +117,7 @@ ErrorCode Model::removeFile()
         }
     }
     m_scanner->scan(m_mainDirectoryPath);
+    saveConfig();
 
     return ErrorCode::SUCCESS;
 }
@@ -137,6 +140,7 @@ void Model::stopSync()
 
 void Model::forceSync()
 {
+        std::lock_guard<std::mutex> lock(m_mutex);
         m_scanner->scan(m_mainDirectoryPath);
         auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
         m_fileSynchronizer->synchronizeAdded(outputComparing.first);

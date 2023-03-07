@@ -30,7 +30,6 @@ public:
     void saveConfig();
     void addConfig(std::istream &std_input);
     fs::path getMainDirectoryPath();
-    bool m_syncStarted = false;
 
 private:
     bool validateForRemoval(std::string name);
@@ -41,5 +40,7 @@ private:
     std::unique_ptr<Serializer> m_serializer;
 
     std::chrono::duration<int64_t, std::milli> m_interval;
+    bool m_syncStarted = false;
+    std::mutex m_mutex;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 };
