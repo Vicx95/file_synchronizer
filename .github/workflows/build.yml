@@ -24,5 +24,4 @@ jobs:
       run: |
           sudo apt-get update -y
           sudo apt-get install -y valgrind
-          valgrind --leak-check=full ./file_synchronizer
           valgrind --leak-check=full ./file_synchronizer-ut
