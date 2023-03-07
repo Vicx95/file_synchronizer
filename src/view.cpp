@@ -9,8 +9,6 @@
 #include <thread>
 
 
-#include "..//inc/ftxui/dom/elements.hpp"
-#include "..//inc/ftxui/screen/screen.hpp"
 #include <ftxui/dom/table.hpp>      // for Table, TableSelection
 
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
