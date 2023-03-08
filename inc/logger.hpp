@@ -59,6 +59,10 @@ class I_Logger
 public:
     I_Logger() = default;
     virtual ~I_Logger() = default;
+    I_Logger(const I_Logger &) = delete;
+    I_Logger &operator=(const I_Logger &) = delete;
+    I_Logger(I_Logger&&) = delete;
+    I_Logger &operator=(I_Logger&&) = delete;
     virtual void prepareMessage(const std::string &, const LogLevel);
 
 protected:
@@ -70,18 +74,17 @@ protected:
     virtual void logMessage(const std::string &);
     virtual std::string makeTimestamp();
 
-private:
-    I_Logger(const I_Logger &) = delete;
-    I_Logger &operator=(const I_Logger &) = delete;
-    I_Logger(I_Logger&&) = delete;
-    I_Logger &operator=(I_Logger&&) = delete;
-    
+private:    
     virtual void processEntries() = 0;
 };
 
 class FileLogger : public I_Logger
 {
 public:
+    FileLogger(const FileLogger &) = delete;
+    FileLogger &operator=(const FileLogger &) = delete;
+    FileLogger(FileLogger &&) = delete;
+    FileLogger &operator=(FileLogger &&) = delete;
     static FileLogger &getLogger()
     {
         static FileLogger logger;
@@ -92,10 +95,6 @@ private:
     const char *path = "./log.txt";
     FileLogger();
     ~FileLogger();
-    FileLogger(const FileLogger &) = delete;
-    FileLogger &operator=(const FileLogger &) = delete;
-    FileLogger(FileLogger &&) = delete;
-    FileLogger &operator=(FileLogger &&) = delete;
     void processEntries() override;
 };
 

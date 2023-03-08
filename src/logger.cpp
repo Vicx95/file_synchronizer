@@ -4,12 +4,10 @@
 #include <thread>
 #include <iostream>
 #include <ctime>
-//#include <format>
 
 std::string I_Logger::makeTimestamp()
 {
     auto timePoint = std::chrono::system_clock::now();
-    //std::format("{0:%F %R %Z}", timePoint);
     std::time_t t = std::chrono::system_clock::to_time_t(timePoint);
     char buf[20];
     strftime(buf, 20, "%d.%m.%Y %H:%M:%S", localtime(&t));
