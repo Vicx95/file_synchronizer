@@ -11,8 +11,6 @@ FetchContent_Declare(
   GIT_TAG release-1.12.1
 )
 
-find_package(nlohmann_json 3.2.0 REQUIRED)
-
 set(SOURCES 
     src/controller.cpp
     src/main.cpp
@@ -39,6 +37,6 @@ set(UT-SOURCES
 add_library(${PROJECT_NAME}-lib STATIC ${SOURCES})
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})
 link_libraries(gmock)
-target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock nlohmann_json::nlohmann_json ${PROJECT_NAME}-lib)
+target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock ${PROJECT_NAME}-lib)
 target_compile_options(${PROJECT_NAME}-ut PRIVATE ${FLAGS})
 add_test(NAME ${PROJECT_NAME}-test COMMAND ${PROJECT_NAME}-ut)
