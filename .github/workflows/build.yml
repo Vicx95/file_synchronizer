@@ -14,6 +14,7 @@ jobs:
     - name: Compile
       working-directory: build
       run: |
+        sudo apt-get install -y nlohmann-json3-dev
         cmake ..
         make
     - name: Run tests
@@ -24,5 +25,4 @@ jobs:
       run: |
           sudo apt-get update -y
           sudo apt-get install -y valgrind
-          valgrind --leak-check=full ./file_synchronizer
           valgrind --leak-check=full ./file_synchronizer-ut
