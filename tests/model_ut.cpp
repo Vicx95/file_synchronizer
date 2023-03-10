@@ -1,7 +1,7 @@
 #include "..//inc/model.hpp"
-#include "scanner_test.hpp"
-#include "synchronizer_test.hpp"
-#include "timer_test.hpp"
+#include "scanner_mock.hpp"
+#include "synchronizer_mock.hpp"
+#include "timer_mock.hpp"
 
 #include <chrono>
 #include <istream>
@@ -105,10 +105,4 @@ TEST_F(ModelTest, ModelChangeInterval)
     std::istringstream is("2000");
     m.setIntervalTime(is);
     m.startSync();
-}
-
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

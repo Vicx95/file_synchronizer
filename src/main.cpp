@@ -1,9 +1,9 @@
-#include "..//inc/FileSynchronizer.hpp"
-#include "..//inc/Scanner.hpp"
-#include "..//inc/Serializer.hpp"
-#include "..//inc/ThreadPool.hpp"
 #include "..//inc/controller.hpp"
+#include "..//inc/file_synchronizer.hpp"
+#include "..//inc/logger.hpp"
 #include "..//inc/model.hpp"
+#include "..//inc/scanner.hpp"
+#include "..//inc/serializer.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
 
@@ -16,7 +16,7 @@
 
 int main()
 {
-
+    LOG_INFO("Synchronizer starting");
     Timer tm;
     View v;
     Scanner scanner;

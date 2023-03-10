@@ -1,3 +1,6 @@
 build/*
 .vscode/*
 mainDirectory/*
+configDirectory/*
+config.json
+config.txt
