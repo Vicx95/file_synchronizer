@@ -6,7 +6,6 @@
 #include "..//inc/serializer.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
-#include "../inc/thread_pool_provider.hpp"
 
 #include <chrono> // chrono::system_clock
 #include <ctime>
@@ -19,16 +18,22 @@ int main()
 {
     LOG_INFO("Synchronizer starting");
 
-    Timer tm;
-    View v;
-    Scanner scanner;
-    FileSynchronizer sync;
+    try
+    {
+        Timer tm;
+        View v;
+        Scanner scanner;
+        FileSynchronizer sync;
 
-    auto future = ThreadPoolProvider::instance().getThreadPool()->submit([]() { return "Chuck Testa"; });
-    std::cout << future.get() << '\n';
+        Model m(&tm, &sync, &scanner);
+        Controller c(&v, &m);
+        c.run();
+    }
+    catch (std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    Model m(&tm, &sync, &scanner);
-    Controller c(&v, &m);
-    v.setListener(&c);
-    v.run();
+    return EXIT_SUCCESS;
 }

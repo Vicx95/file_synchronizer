@@ -2,6 +2,7 @@
 
 #include "logger.hpp"
 #include "thread_pool.hpp"
+#include <atomic>
 #include <memory>
 
 class ThreadPoolProvider
@@ -36,12 +37,9 @@ private:
         LOG_INFO("Thread Pool Provider instantiated");
     }
 
+    ~ThreadPoolProvider() = default;
     ThreadPoolProvider(const ThreadPoolProvider &) = delete;
     ThreadPoolProvider &operator=(const ThreadPoolProvider &) = delete;
-
-    ~ThreadPoolProvider()
-    {
-    }
 
     std::unique_ptr<ThreadPool> m_tp;
 };

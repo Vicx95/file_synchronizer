@@ -9,11 +9,6 @@
 
 namespace fs = std::filesystem;
 
-void View::setListener(i_ViewListener *listener)
-{
-    this->listener = listener;
-}
-
 void View::printMenu()
 {
     std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";
@@ -35,24 +30,17 @@ void View::printOptions()
               << "11. Save config  \n";
 }
 
-void View::waitForButton()
+void View::printDirectory(const fs::path &path)
 {
-    std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
-}
+    fs::current_path(path);
+    std::cout << "Print current path: " << path << "\n\n";
 
-void View::printDirectory()
-{
-
-    fs::current_path(mainDirectoryPath);
-    std::cout << "Print current path: " << mainDirectoryPath << "\n\n";
-
-    for (auto const &dirEntry : fs::directory_iterator(mainDirectoryPath))
+    for (auto const &dirEntry : fs::directory_iterator(path))
     {
         std::cout << dirEntry.path() << std::endl;
     }
-    if (fs::is_empty(mainDirectoryPath))
+    if (fs::is_empty(path))
         std::cout << "Folder is empty...\n";
-    waitForButton();
 }
 
 bool View::validateForPrinting(std::string name)
@@ -64,119 +52,47 @@ bool View::validateForPrinting(std::string name)
     if (!fs::exists(fs::current_path() / name))
     {
         std::cout << "Not exist file or directory\n";
-        waitForButton();
         return false;
     }
     return true;
 }
 
-void View::printFiles()
+void View::printFiles(const std::set<fs::path> &fileDirList)
 {
-    std::set<fs::path> sorted_by_name;
-    std::cout << "Give folder name or choose 'all' to print files: \n";
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
-
-    if (validateForPrinting(dirName))
-    {
-        if (dirName == "all")
-        {
-            dirName = mainDirectoryPath;
-        }
-        for (auto const &dirEntry : fs::recursive_directory_iterator(dirName))
-        {
-            sorted_by_name.insert(dirEntry.path());
-        }
-
-        for (auto const &fileName : sorted_by_name)
-        {
-            if (fs::is_directory(fileName))
-            {
-                std::cout << "-------------------\n";
-                std::cout << "Directory: " << fileName.filename() << ":\n";
-            }
-            if (fs::is_regular_file(fileName))
-            {
-                std::cout << fileName.filename() << "\n";
-            }
-        }
-
-        if (fs::is_empty(mainDirectoryPath / dirName))
-            std::cout << "Folder is empty...";
-
-        std::cout << "\n";
-        waitForButton();
-    }
-}
-
-void View::run()
-{
-    std::string inputKey;
-    std::regex keyRegex("([0-9]{1})");
-
-    while (!m_isExitRequested)
-    {
-        printMenu();
-        printOptions();
-
+    (void)fileDirList;
+    /*     std::set<fs::path> sorted_by_name;
+        std::cout << "Give folder name or choose 'all' to print files: \n";
+        std::string dirName;
         std::cin.clear();
-        std::cin >> inputKey;
+        std::cin >> dirName;
 
-        if (!std::regex_search(inputKey, keyRegex))
+        if (validateForPrinting(dirName))
         {
-            std::cout << "Incorrect action selected! Please try again...\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            continue;
-        }
+            if (dirName == "all")
+            {
+                dirName = mainDirectoryPath;
+            }
+            for (auto const &dirEntry : fs::recursive_directory_iterator(dirName))
+            {
+                sorted_by_name.insert(dirEntry.path());
+            }
 
-        switch (static_cast<Action>(std::stoul(inputKey)))
-        {
-        case Action::AddDir:
-            listener->addDirectory(std::cin);
-            break;
-        case Action::RemoveDir:
-            listener->removeDirectory();
-            break;
-        case Action::RemoveFile:
-            listener->removeFile();
-            break;
-        case Action::PrintDir:
-            listener->printDirectory();
-            break;
-        case Action::PrintFiles:
-            listener->printFiles();
-            break;
-        case Action::SetIntervalTime:
-            listener->setIntervalTime(std::cin);
-            break;
-        case Action::StartSync:
-            listener->startSync();
-            break;
-        case Action::StopSync:
-            listener->stopSync();
-            break;
-        case Action::ForceSync:
-            listener->forceSync();
-            break;
-        case Action::readConfig:
-            listener->readConfig();
-            break;
-        case Action::saveConfig:
-            listener->saveConfig();
-            break;
-        case Action::Exit:
-            m_isExitRequested = listener->exit();
-            break;
-        default:
-            std::cout << "Incorrect action selected! Please try again...\n";
-            waitForButton();
-            break;
-        }
-    }
-}
+            for (auto const &fileName : sorted_by_name)
+            {
+                if (fs::is_directory(fileName))
+                {
+                    std::cout << "-------------------\n";
+                    std::cout << "Directory: " << fileName.filename() << ":\n";
+                }
+                if (fs::is_regular_file(fileName))
+                {
+                    std::cout << fileName.filename() << "\n";
+                }
+            }
 
-void View::setMainDirectoryPath(const fs::path &path)
-{
-    mainDirectoryPath = path;
+            if (fs::is_empty(mainDirectoryPath / dirName))
+                std::cout << "Folder is empty...";
+
+            std::cout << "\n";
+        } */
 }
