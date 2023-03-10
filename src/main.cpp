@@ -6,6 +6,7 @@
 #include "..//inc/serializer.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
+#include "../inc/thread_pool_provider.hpp"
 
 #include <chrono> // chrono::system_clock
 #include <ctime>
@@ -17,14 +18,13 @@
 int main()
 {
     LOG_INFO("Synchronizer starting");
+
     Timer tm;
     View v;
     Scanner scanner;
     FileSynchronizer sync;
 
-    ThreadPool tp;
-    auto future = tp.submit([]() { return "Chuck Testa"; });
-
+    auto future = ThreadPoolProvider::instance().getThreadPool()->submit([]() { return "Chuck Testa"; });
     std::cout << future.get() << '\n';
 
     Model m(&tm, &sync, &scanner);

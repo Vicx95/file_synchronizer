@@ -26,6 +26,7 @@ set(SOURCES
 
 set(HEADERS 
     inc/thread_pool.hpp
+    inc/thread_pool_provider.hpp
     )
 
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
@@ -36,15 +37,17 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 set(UT-SOURCES 
-    tests/main.cpp
+    tests/model_ut.cpp
     src/controller.cpp
+    src/main.cpp
     src/model.cpp
     src/view.cpp
     src/timer.cpp
-    src/FileSynchronizer.cpp
-    src/Scanner.cpp
-    src/Serializer.cpp
-    src/ThreadPool.cpp
+    src/file_synchronizer.cpp
+    src/scanner.cpp
+    src/serializer.cpp
+    src/logger.cpp
+    #src/thread_pool.cpp
     )
 
 add_library(${PROJECT_NAME}-lib STATIC ${SOURCES})
