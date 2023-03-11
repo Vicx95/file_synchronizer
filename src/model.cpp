@@ -8,15 +8,20 @@ namespace fs = std::filesystem;
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
              std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
              std::unique_ptr<i_Scanner> scanner)
-    : m_syncTimer(std::move(syncTimer)), m_fileSynchronizer(std::move(fileSynchronizer)), m_scanner(std::move(scanner)), m_interval(1000){
+    : m_syncTimer(std::move(syncTimer)),               //
+      m_fileSynchronizer(std::move(fileSynchronizer)), //
+      m_scanner(std::move(scanner)),                   //
+      m_interval(1000)                                 //
+      {
 
-                                                                                                                         };
+      };
 
 ErrorCode Model::addDirectory(const std::string &dirName)
 {
     if (!fs::exists(fs::current_path() / dirName))
     {
         fs::create_directory(dirName);
+
         return ErrorCode::SUCCESS;
     }
 
@@ -59,6 +64,7 @@ ErrorCode Model::removeDirectory(const std::string &dirName)
     if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);
+
         return ErrorCode::SUCCESS;
     }
     return ErrorCode::FAIL;
@@ -77,6 +83,7 @@ ErrorCode Model::removeFile(const std::string &dirName)
         if (validateForRemoval(fileName))
         {
             fs::remove(fileName);
+
             return ErrorCode::SUCCESS;
         }
     }

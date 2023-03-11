@@ -10,15 +10,18 @@ Timer::~Timer()
 
 void Timer::start(const Interval &interval, const Callback &timeoutCallback)
 {
-    m_timerIsRunning = true;
+    if (!m_timerIsRunning)
+    {
+        m_timerIsRunning = true;
 
-    m_thread = std::thread([this, interval, timeoutCallback] {
-        while (m_timerIsRunning)
-        {
-            std::this_thread::sleep_for(interval);
-            timeoutCallback();
-        }
-    });
+        m_thread = std::thread([this, interval, timeoutCallback] {
+            while (m_timerIsRunning)
+            {
+                std::this_thread::sleep_for(interval);
+                timeoutCallback();
+            }
+        });
+    }
 }
 
 void Timer::stop()

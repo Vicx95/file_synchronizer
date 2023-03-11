@@ -60,6 +60,7 @@ void Controller::waitForButton()
 
 std::optional<std::string> Controller::getKeyboardInput(std::regex keyRegex)
 {
+    // TODO: prepare regexes
     std::string input;
 
     std::cin.clear();
