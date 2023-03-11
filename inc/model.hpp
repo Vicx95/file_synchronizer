@@ -3,7 +3,11 @@
 #include "file_synchronizer.hpp"
 #include "serializer.hpp"
 #include "timer.hpp"
+
+#include <chrono>
 #include <filesystem>
+#include <iostream> // TODO: delete
+#include <string>
 
 namespace fs = std::filesystem;
 
@@ -20,9 +24,9 @@ public:
           std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
           std::unique_ptr<i_Scanner> scanner);
 
-    ErrorCode addDirectory(const std::string &dirName);
-    ErrorCode removeDirectory(const std::string &dirName);
-    ErrorCode removeFile(const std::string &dirName);
+    static ErrorCode addDirectory(const std::string &dirName);
+    static ErrorCode removeDirectory(const std::string &dirName);
+    static ErrorCode removeFile(const std::string &dirName);
     void createMainDir();
 
     void setIntervalTime(const std::string &strInterval);

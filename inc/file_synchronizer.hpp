@@ -1,7 +1,11 @@
 #pragma once
 
-#include "scanner.hpp"
-#include "timer.hpp"
+#include <filesystem>
+#include <iostream>
+#include <vector>
+
+namespace fs = std::filesystem;
+using PathTimePair_t = std::pair<fs::path, fs::file_time_type>;
 
 class i_FileSynchronizer
 {

@@ -7,13 +7,6 @@
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
 
-#include <chrono> // chrono::system_clock
-#include <ctime>
-#include <future>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 int main()
 {
     LOG_INFO("Synchronizer starting");

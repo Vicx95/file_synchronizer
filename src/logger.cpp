@@ -1,9 +1,6 @@
 #include "..//inc/logger.hpp"
 
-#include <chrono>
-#include <thread>
 #include <iostream>
-#include <ctime>
 
 std::string I_Logger::makeTimestamp()
 {
@@ -65,7 +62,7 @@ void FileLogger::processEntries()
         m_messageQueue.pop();
     }
 
-    //exit condition
+    // exit condition
     while (m_exit && !m_messageQueue.empty())
     {
         logFile << m_messageQueue.front() << std::endl;

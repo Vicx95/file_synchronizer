@@ -2,7 +2,10 @@
 
 #include "model.hpp"
 #include "view.hpp"
+
 #include <chrono>
+#include <functional>
+#include <regex>
 #include <unordered_map>
 
 using namespace std::chrono_literals;
@@ -55,6 +58,8 @@ private:
     std::optional<std::string> getKeyboardInput(std::regex keyRegex = std::regex("^.{1,50}"));
 
     void init();
+
+    void process(auto fun);
 
     void addDirectory();
     void removeDirectory();

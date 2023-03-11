@@ -3,9 +3,6 @@
 #include "..//inc/thread_pool_provider.hpp"
 #include "..//inc/view.hpp"
 
-#include <chrono>
-#include <iostream>
-
 namespace fs = std::filesystem;
 
 Model::Model(std::unique_ptr<i_Timer> syncTimer,

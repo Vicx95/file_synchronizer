@@ -1,13 +1,4 @@
 #include "..//inc/view.hpp"
-#include "..//inc/model.hpp"
-
-#include <chrono>
-#include <cstdlib>
-#include <filesystem>
-#include <set>
-#include <thread>
-
-namespace fs = std::filesystem;
 
 void View::printMenu()
 {

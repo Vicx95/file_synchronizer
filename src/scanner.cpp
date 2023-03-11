@@ -1,12 +1,5 @@
 #include "..//inc/scanner.hpp"
 #include "..//inc/logger.hpp"
-#include <chrono>
-#include <ctime>
-#include <filesystem>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
 
 Scanner::Scanner()
 {
@@ -48,30 +41,31 @@ std::pair<std::vector<PathTimePair_t>, std::vector<PathTimePair_t>> Scanner::com
     }
     // Added file scanning
     std::vector<PathTimePair_t> added;
+
     std::set_difference(sortedLast.begin(), sortedLast.end(), sortedPrevious.begin(), sortedPrevious.end(),
                         std::inserter(added, added.begin()));
-    if(!added.empty())
+    if (!added.empty())
     {
         for (auto el : added)
         {
             if (fs::is_regular_file(el.first))
-            {   
+            {
                 std::string fileName = el.first.filename();
                 LOG_INFO("Added file: " + fileName);
             }
         }
     }
-   
+
     // Removed file scanning
     std::vector<PathTimePair_t> removed;
     std::set_difference(sortedPrevious.begin(), sortedPrevious.end(), sortedLast.begin(), sortedLast.end(),
                         std::inserter(removed, removed.begin()), [](PathTimePair_t lhs, PathTimePair_t rhs) { return lhs < rhs; });
-    if(!removed.empty())
+    if (!removed.empty())
     {
         for (auto el : removed)
         {
             if (fs::is_regular_file(el.first))
-            {   
+            {
                 std::string fileName = el.first.filename();
                 LOG_INFO("Removed file: " + fileName);
             }

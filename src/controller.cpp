@@ -1,6 +1,6 @@
 #include "..//inc/controller.hpp"
 #include "..//inc/logger.hpp"
-#include "../inc/thread_pool_provider.hpp"
+#include "..//inc/thread_pool_provider.hpp"
 
 Controller::Controller()
 {
@@ -73,14 +73,11 @@ std::optional<std::string> Controller::getKeyboardInput(std::regex keyRegex)
     return input;
 }
 
-void Controller::addDirectory()
+void Controller::process(auto fun)
 {
-    m_model->createMainDir();
-    m_view->printMessage(View::Message::GiveFolder);
-
     if (auto input = getKeyboardInput(); input.has_value())
     {
-        if (ErrorCode::SUCCESS != m_model->addDirectory(input.value()))
+        if (ErrorCode::SUCCESS != fun(input.value()))
         {
             m_view->printMessage(View::Message::DirExists);
             waitForButton();
@@ -88,46 +85,30 @@ void Controller::addDirectory()
     }
     else
     {
-        std::this_thread::sleep_for(Config_UISleepFor);
         m_view->printMessage(View::Message::Incorrect);
+        std::this_thread::sleep_for(Config_UISleepFor);
     }
+}
+
+void Controller::addDirectory()
+{
+    m_model->createMainDir();
+    m_view->printMessage(View::Message::GiveFolder);
+
+    this->process(std::forward<decltype(Model::addDirectory)>(Model::addDirectory));
 }
 
 void Controller::removeDirectory()
 {
     m_view->printMessage(View::Message::Remove);
 
-    if (auto input = getKeyboardInput(); input.has_value())
-    {
-        if (ErrorCode::SUCCESS != m_model->removeDirectory(input.value()))
-        {
-            m_view->printMessage(View::Message::DirExists);
-            waitForButton();
-        }
-    }
-    else
-    {
-        std::this_thread::sleep_for(Config_UISleepFor);
-        m_view->printMessage(View::Message::Incorrect);
-    }
+    this->process(std::forward<decltype(Model::removeDirectory)>(Model::removeDirectory));
 }
 void Controller::removeFile()
 {
     m_view->printMessage(View::Message::RemoveFile);
 
-    if (auto input = getKeyboardInput(); input.has_value())
-    {
-        if (ErrorCode::SUCCESS != m_model->removeFile(input.value()))
-        {
-            m_view->printMessage(View::Message::DirExists);
-            waitForButton();
-        }
-    }
-    else
-    {
-        std::this_thread::sleep_for(Config_UISleepFor);
-        m_view->printMessage(View::Message::Incorrect);
-    }
+    this->process(std::forward<decltype(Model::removeFile)>(Model::removeFile));
 }
 void Controller::printDirectory()
 {
@@ -158,7 +139,7 @@ void Controller::printFiles()
         std::cout << "Folder is empty...";
 
     std::cout << "\n";*/
-    m_view->printFiles();
+    // m_view->printFiles();
     this->waitForButton();
 }
 void Controller::setIntervalTime()

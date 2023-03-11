@@ -1,7 +1,5 @@
 #include "..//inc/file_synchronizer.hpp"
 
-#include <iostream>
-
 FileSynchronizer::FileSynchronizer()
 {
 }
