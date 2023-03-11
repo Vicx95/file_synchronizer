@@ -18,11 +18,13 @@ class Model
 public:
     Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner *scanner);
 
-    ErrorCode addDirectory(std::istream &std_input);
+    ErrorCode addDirectory(const std::string &dirName);
     ErrorCode removeDirectory();
     ErrorCode removeFile();
+    void createMainDir();
 
-    void setIntervalTime(std::istream &std_input);
+    void setIntervalTime(const std::string &strInterval);
+    void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval);
     void startSync();
     void stopSync();
     void forceSync();

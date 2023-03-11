@@ -57,6 +57,28 @@ bool View::validateForPrinting(std::string name)
     return true;
 }
 
+void View::printMessage(Message m)
+{
+    switch (m)
+    {
+    case Message::GiveFolder:
+        std::cout << "Give folder name to add: \n";
+        break;
+    case Message::DirExists:
+        std::cout << "Dir already exist...\n";
+        break;
+    case Message::Incorrect:
+        std::cout << "Incorrect action selected! Please try again...\n";
+        break;
+    case Message::Interval:
+        std::cout << "Interval time value [milliseconds]: \n";
+        break;
+
+    default:
+        break;
+    }
+}
+
 void View::printFiles(const std::set<fs::path> &fileDirList)
 {
     (void)fileDirList;

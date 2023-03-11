@@ -2,13 +2,16 @@
 
 #include "model.hpp"
 #include "view.hpp"
+#include <chrono>
 #include <unordered_map>
 
-using pVoid = std::function<void()>;
+using namespace std::chrono_literals;
 
 class Controller
 {
 public:
+    using pVoid = std::function<void(Controller *)>;
+
     Controller(View *view, Model *model);
 
     void run();
@@ -31,8 +34,8 @@ private:
             StartSync = 7,
             StopSync = 8,
             ForceSync = 9,
-            readConfig = 10,
-            saveConfig = 11,
+            ReadConfig = 10,
+            SaveConfig = 11,
             Exit = 0
         };
 
@@ -48,17 +51,17 @@ private:
         std::unordered_map<Handlers::Action, pVoid, EnumClassHash> m_handlerMap;
     };
 
-    void
-    waitForButton();
+    void waitForButton();
+    std::optional<std::string> getKeyboardInput(std::regex keyRegex = std::regex("^.{1,50}"));
 
     void init();
 
-    void addDirectory(std::istream &std_input);
+    void addDirectory();
     void removeDirectory();
     void removeFile();
     void printDirectory();
     void printFiles();
-    void setIntervalTime(std::istream &std_input);
+    void setIntervalTime();
     void startSync();
     void stopSync();
     void forceSync();
@@ -67,6 +70,7 @@ private:
     bool exit();
 
     bool m_isExitRequested = false;
+    static constexpr std::chrono::milliseconds Config_UISleepFor = 2000ms;
 
     View *m_view;
     Model *m_model;

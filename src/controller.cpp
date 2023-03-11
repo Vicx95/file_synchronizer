@@ -10,79 +10,43 @@ Controller::Controller(View *view, Model *model)
 
 void Controller::run()
 {
-
-    std::string inputKey;
-    std::regex keyRegex("([0-9]{1})");
-
     while (!m_isExitRequested)
     {
         m_view->printMenu();
         m_view->printOptions();
 
-        std::cin.clear();
-        std::cin >> inputKey;
-
-        if (!std::regex_search(inputKey, keyRegex))
+        if (auto input = getKeyboardInput(); !input.has_value())
         {
-            std::cout << "Incorrect action selected! Please try again...\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(Config_UISleepFor);
+            m_view->printMessage(View::Message::Incorrect);
+
             continue;
         }
-
-        if (Handlers::Action mappedKey = static_cast<Handlers::Action>(std::stoul(inputKey)); h.m_handlerMap.contains(mappedKey))
+        else if (Handlers::Action mappedKey = static_cast<Handlers::Action>(std::stoul(input.value())); h.m_handlerMap.contains(mappedKey))
         {
-            h.m_handlerMap.at(mappedKey)();
+            h.m_handlerMap.at(mappedKey)(this);
         }
-        /*
-                switch (static_cast<Handlers::Action>(std::stoul(inputKey)))
-                {
-                case Handlers::Action::AddDir:
-                    this->addDirectory(std::cin);
-                    break;
-                case Action::RemoveDir:
-                    this->removeDirectory();
-                    break;
-                case Action::RemoveFile:
-                    this->removeFile();
-                    break;
-                case Action::PrintDir:
-                    this->printDirectory();
-                    break;
-                case Action::PrintFiles:
-                    this->printFiles();
-                    break;
-                case Action::SetIntervalTime:
-                    this->setIntervalTime(std::cin);
-                    break;
-                case Action::StartSync:
-                    this->startSync();
-                    break;
-                case Action::StopSync:
-                    this->stopSync();
-                    break;
-                case Action::ForceSync:
-                    this->forceSync();
-                    break;
-                case Action::readConfig:
-                    this->readConfig();
-                    break;
-                case Action::saveConfig:
-                    this->saveConfig();
-                    break;
-                case Action::Exit:
-                    m_isExitRequested = this->exit();
-                    break;
-                default:
-                    std::cout << "Incorrect action selected! Please try again...\n";
-                    waitForButton();
-                    break;
-                }*/
     }
 }
 
 void Controller::init()
 {
-    h.m_handlerMap = {{Handlers::Action::AddDir, [this]() { this->removeDirectory(); }}};
+    h.m_handlerMap = {
+        //
+        {Handlers::Action::AddDir, &Controller::addDirectory},
+        {Handlers::Action::RemoveDir, &Controller::removeDirectory},
+        {Handlers::Action::RemoveFile, &Controller::removeFile},
+        {Handlers::Action::PrintDir, &Controller::printDirectory},
+        {Handlers::Action::PrintFiles, &Controller::printFiles},
+        {Handlers::Action::SetIntervalTime, &Controller::setIntervalTime},
+        {Handlers::Action::StartSync, &Controller::startSync},
+        {Handlers::Action::StopSync, &Controller::stopSync},
+        {Handlers::Action::ForceSync, &Controller::forceSync},
+        {Handlers::Action::ReadConfig, &Controller::readConfig},
+        {Handlers::Action::SaveConfig, &Controller::saveConfig},
+        {Handlers::Action::Exit, &Controller::exit}
+        //
+    };
 }
 
 void Controller::waitForButton()
@@ -90,10 +54,41 @@ void Controller::waitForButton()
     std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
 }
 
-void Controller::addDirectory(std::istream &std_input)
+std::optional<std::string> Controller::getKeyboardInput(std::regex keyRegex)
 {
-    m_model->addDirectory(std_input);
+    std::string input;
+
+    std::cin.clear();
+    std::cin >> input;
+
+    if (!std::regex_search(input, keyRegex))
+    {
+        return {};
+    }
+
+    return input;
 }
+
+void Controller::addDirectory()
+{
+    m_model->createMainDir();
+    m_view->printMessage(View::Message::GiveFolder);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        if (ErrorCode::SUCCESS != m_model->addDirectory(input.value()))
+        {
+            m_view->printMessage(View::Message::DirExists);
+            waitForButton();
+        }
+    }
+    else
+    {
+        std::this_thread::sleep_for(Config_UISleepFor);
+        m_view->printMessage(View::Message::Incorrect);
+    }
+}
+
 void Controller::removeDirectory()
 {
     m_model->removeDirectory();
@@ -112,9 +107,14 @@ void Controller::printFiles()
     // m_view->printFiles();
     this->waitForButton();
 }
-void Controller::setIntervalTime(std::istream &std_input)
+void Controller::setIntervalTime()
 {
-    m_model->setIntervalTime(std_input);
+    m_view->printMessage(View::Message::Interval);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        m_model->setIntervalTime(input.value());
+    }
 }
 void Controller::startSync()
 {
@@ -142,5 +142,6 @@ bool Controller::exit()
 {
     LOG_INFO("Stopping synchronizer");
     m_model->stopSync();
+
     return true;
 }

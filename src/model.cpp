@@ -13,9 +13,19 @@ Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner
 
                                                                                         };
 
-ErrorCode Model::addDirectory(std::istream &std_input)
+ErrorCode Model::addDirectory(const std::string &dirName)
 {
+    if (!fs::exists(fs::current_path() / dirName))
+    {
+        fs::create_directory(dirName);
+        return ErrorCode::SUCCESS;
+    }
 
+    return ErrorCode::FAIL;
+}
+
+void Model::createMainDir()
+{
     try
     {
         fs::current_path(m_mainDirectoryPath);
@@ -26,34 +36,16 @@ ErrorCode Model::addDirectory(std::istream &std_input)
         fs::create_directory(m_mainDirectoryPath);
         fs::current_path(m_mainDirectoryPath);
     }
-
-    std::cout << "Give folder name to add: \n";
-    std::string dirName;
-    std_input.clear();
-    std_input >> dirName;
-    if (!fs::exists(fs::current_path() / dirName))
-    {
-        fs::create_directory(dirName);
-        return ErrorCode::SUCCESS;
-    }
-    else
-    {
-        std::cout << "Dir already exist...\n";
-        // View::waitForButton();
-        return ErrorCode::FAIL;
-    }
 }
 
-void Model::setIntervalTime(std::istream &std_input)
+void Model::setIntervalTime(const std::string &strInterval)
 {
-    std::cout << "Interval time value [milliseconds]: \n";
-    int64_t input;
+    m_interval = static_cast<std::chrono::duration<int64_t, std::milli>>(std::stoll(strInterval));
+}
 
-    std_input.clear();
-    std_input >> input;
-
-    std::chrono::duration<int64_t, std::milli> _interval(input);
-    m_interval = _interval;
+void Model::setIntervalTime(std::chrono::duration<int64_t, std::milli> interval)
+{
+    m_interval = interval;
 }
 
 bool Model::validateForRemoval(std::string name)
@@ -125,6 +117,7 @@ void Model::forceSync()
     });
     auto outputComparing = future.get();
 
+    // TODO
     m_fileSynchronizer->synchronizeAdded(outputComparing.first);
     m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
     m_scanner->scanForChangedDirs(m_mainDirectoryPath);
