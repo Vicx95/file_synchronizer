@@ -20,13 +20,8 @@ int main()
 
     try
     {
-        Timer tm;
-        View v;
-        Scanner scanner;
-        FileSynchronizer sync;
-
-        Model m(&tm, &sync, &scanner);
-        Controller c(&v, &m);
+        Model m(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>());
+        Controller c(std::make_unique<View>(), &m);
         c.run();
     }
     catch (std::exception &e)

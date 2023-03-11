@@ -2,8 +2,14 @@
 #include "..//inc/logger.hpp"
 #include "../inc/thread_pool_provider.hpp"
 
-Controller::Controller(View *view, Model *model)
-    : m_view(view), m_model(model)
+Controller::Controller()
+{
+    // TODO provide simple factory
+    // Controller(std::move(std::make_unique<View>()), std::move(std::make_unique<Model>()));
+}
+
+Controller::Controller(std::unique_ptr<View> view, Model *model)
+    : m_view(std::move(view)), m_model(model)
 {
     this->init();
 }
@@ -32,8 +38,7 @@ void Controller::run()
 void Controller::init()
 {
     h.m_handlerMap = {
-        //
-        {Handlers::Action::AddDir, &Controller::addDirectory},
+        {Handlers::Action::AddDir, &Controller::addDirectory}, //
         {Handlers::Action::RemoveDir, &Controller::removeDirectory},
         {Handlers::Action::RemoveFile, &Controller::removeFile},
         {Handlers::Action::PrintDir, &Controller::printDirectory},
@@ -44,8 +49,7 @@ void Controller::init()
         {Handlers::Action::ForceSync, &Controller::forceSync},
         {Handlers::Action::ReadConfig, &Controller::readConfig},
         {Handlers::Action::SaveConfig, &Controller::saveConfig},
-        {Handlers::Action::Exit, &Controller::exit}
-        //
+        {Handlers::Action::Exit, &Controller::exit} //
     };
 }
 
@@ -91,11 +95,39 @@ void Controller::addDirectory()
 
 void Controller::removeDirectory()
 {
-    m_model->removeDirectory();
+    m_view->printMessage(View::Message::Remove);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        if (ErrorCode::SUCCESS != m_model->removeDirectory(input.value()))
+        {
+            m_view->printMessage(View::Message::DirExists);
+            waitForButton();
+        }
+    }
+    else
+    {
+        std::this_thread::sleep_for(Config_UISleepFor);
+        m_view->printMessage(View::Message::Incorrect);
+    }
 }
 void Controller::removeFile()
 {
-    m_model->removeFile();
+    m_view->printMessage(View::Message::RemoveFile);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        if (ErrorCode::SUCCESS != m_model->removeFile(input.value()))
+        {
+            m_view->printMessage(View::Message::DirExists);
+            waitForButton();
+        }
+    }
+    else
+    {
+        std::this_thread::sleep_for(Config_UISleepFor);
+        m_view->printMessage(View::Message::Incorrect);
+    }
 }
 void Controller::printDirectory()
 {
@@ -104,7 +136,29 @@ void Controller::printDirectory()
 }
 void Controller::printFiles()
 {
-    // m_view->printFiles();
+    // TODO finish refactor
+    /*     std::set<fs::path> sorted_by_name;
+        std::cout << "Give folder name or choose 'all' to print files: \n";
+        std::string dirName;
+        std::cin.clear();
+        std::cin >> dirName;
+
+        if (validateForPrinting(dirName))
+        {
+            if (dirName == "all")
+            {
+                dirName = mainDirectoryPath;
+            }
+            for (auto const &dirEntry : fs::recursive_directory_iterator(dirName))
+            {
+                sorted_by_name.insert(dirEntry.path());
+            }
+
+    if (fs::is_empty(mainDirectoryPath / dirName))
+        std::cout << "Folder is empty...";
+
+    std::cout << "\n";*/
+    m_view->printFiles();
     this->waitForButton();
 }
 void Controller::setIntervalTime()

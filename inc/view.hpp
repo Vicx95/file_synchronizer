@@ -16,7 +16,9 @@ public:
         Incorrect = 0,
         GiveFolder,
         DirExists,
-        Interval
+        Interval,
+        Remove,
+        RemoveFile
     };
 
     void printMenu();

@@ -11,8 +11,8 @@ class Controller
 {
 public:
     using pVoid = std::function<void(Controller *)>;
-
-    Controller(View *view, Model *model);
+    Controller();
+    Controller(std::unique_ptr<View> view, Model *model);
 
     void run();
 
@@ -72,7 +72,7 @@ private:
     bool m_isExitRequested = false;
     static constexpr std::chrono::milliseconds Config_UISleepFor = 2000ms;
 
-    View *m_view;
-    Model *m_model;
+    std::unique_ptr<View> m_view;
+    std::unique_ptr<Model> m_model;
     Handlers h;
 };

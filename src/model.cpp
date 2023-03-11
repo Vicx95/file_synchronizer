@@ -8,10 +8,12 @@
 
 namespace fs = std::filesystem;
 
-Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner *scanner)
-    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_scanner(scanner), m_interval(1000){
+Model::Model(std::unique_ptr<i_Timer> syncTimer,
+             std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
+             std::unique_ptr<i_Scanner> scanner)
+    : m_syncTimer(std::move(syncTimer)), m_fileSynchronizer(std::move(fileSynchronizer)), m_scanner(std::move(scanner)), m_interval(1000){
 
-                                                                                        };
+                                                                                                                         };
 
 ErrorCode Model::addDirectory(const std::string &dirName)
 {
@@ -50,22 +52,13 @@ void Model::setIntervalTime(std::chrono::duration<int64_t, std::milli> interval)
 
 bool Model::validateForRemoval(std::string name)
 {
-    if (!fs::exists(fs::current_path() / name))
-    {
-        std::cout << "Not exist file or directory\n";
-        // View::waitForButton();
-        return false;
-    }
-    return true;
+    fs::current_path(m_mainDirectoryPath);
+
+    return !fs::exists(fs::current_path() / name);
 }
 
-ErrorCode Model::removeDirectory()
+ErrorCode Model::removeDirectory(const std::string &dirName)
 {
-    fs::current_path(m_mainDirectoryPath);
-    std::cout << "Give folder name to remove: \n";
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
     if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);
@@ -74,13 +67,9 @@ ErrorCode Model::removeDirectory()
     return ErrorCode::FAIL;
 }
 
-ErrorCode Model::removeFile()
+ErrorCode Model::removeFile(const std::string &dirName)
 {
-    std::cout << "Give folder name with files to delete: \n";
-    fs::current_path(m_mainDirectoryPath);
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
+    // TODO finish refactoring
     if (validateForRemoval(dirName))
     {
         fs::current_path(m_mainDirectoryPath / dirName);
@@ -117,7 +106,7 @@ void Model::forceSync()
     });
     auto outputComparing = future.get();
 
-    // TODO
+    // TODO integrate thread pool
     m_fileSynchronizer->synchronizeAdded(outputComparing.first);
     m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
     m_scanner->scanForChangedDirs(m_mainDirectoryPath);
