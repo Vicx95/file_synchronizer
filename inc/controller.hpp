@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <functional>
+#include <optional>
 #include <regex>
 #include <unordered_map>
 
@@ -15,7 +16,9 @@ class Controller
 public:
     using pVoid = std::function<void(Controller *)>;
     Controller();
-    Controller(std::unique_ptr<View> view, Model *model);
+    explicit Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model) noexcept;
+
+    virtual ~Controller();
 
     void run();
 
@@ -77,7 +80,7 @@ private:
     bool m_isExitRequested = false;
     static constexpr std::chrono::milliseconds Config_UISleepFor = 2000ms;
 
-    std::unique_ptr<View> m_view;
-    std::unique_ptr<Model> m_model;
+    std::unique_ptr<View> m_view = nullptr;
+    std::unique_ptr<Model> m_model = nullptr;
     Handlers h;
 };

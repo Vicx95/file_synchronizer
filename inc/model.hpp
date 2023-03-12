@@ -1,6 +1,7 @@
 #pragma once
 
 #include "file_synchronizer.hpp"
+#include "scanner.hpp"
 #include "serializer.hpp"
 #include "timer.hpp"
 
@@ -20,13 +21,22 @@ enum class ErrorCode
 class Model
 {
 public:
-    Model(std::unique_ptr<i_Timer> syncTimer,
-          std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
-          std::unique_ptr<i_Scanner> scanner);
+    Model();
+    explicit Model(std::unique_ptr<i_Timer> syncTimer,
+                   std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
+                   std::unique_ptr<i_Scanner> scanner) noexcept;
 
-    static ErrorCode addDirectory(const std::string &dirName);
-    static ErrorCode removeDirectory(const std::string &dirName);
-    static ErrorCode removeFile(const std::string &dirName);
+    virtual ~Model();
+
+    Model(const Model &) = default;
+    Model &operator=(const Model &) = default;
+    Model(Model &&) = default;
+    Model &operator=(Model &&) = default;
+
+    ErrorCode addDirectory(const std::string &dirName);
+    ErrorCode removeDirectory(const std::string &dirName);
+    ErrorCode removeFile(const std::string &dirName);
+    ErrorCode getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList);
     void createMainDir();
 
     void setIntervalTime(const std::string &strInterval);
@@ -41,10 +51,10 @@ public:
 private:
     bool validateForRemoval(std::string name);
 
-    std::unique_ptr<i_Timer> m_syncTimer;
-    std::unique_ptr<i_FileSynchronizer> m_fileSynchronizer;
-    std::unique_ptr<i_Scanner> m_scanner;
-    std::unique_ptr<Serializer> m_serializer;
+    std::unique_ptr<i_Timer> m_syncTimer = nullptr;
+    std::unique_ptr<i_FileSynchronizer> m_fileSynchronizer = nullptr;
+    std::unique_ptr<i_Scanner> m_scanner = nullptr;
+    std::unique_ptr<i_Serializer> m_serializer = nullptr;
 
     std::chrono::duration<int64_t, std::milli> m_interval;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";

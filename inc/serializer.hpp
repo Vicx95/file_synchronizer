@@ -8,35 +8,36 @@
 #include <set>
 #include <vector>
 
-using json = nlohmann::json;
 namespace fs = std::filesystem;
+
+using json = nlohmann::json;
 using DirsAndFiles = std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>>;
 
-class Serializer
+class i_Serializer
 {
-
 public:
     virtual void serialize() = 0;
     virtual DirsAndFiles deserialize() = 0;
-    virtual ~Serializer()
-    {
-    }
 };
 
-class SerializerToJSON : public Serializer
+class SerializerToJSON : public i_Serializer
 {
     Scanner m_scanner;
 
 public:
-    void serialize();
-    DirsAndFiles deserialize();
+    virtual ~SerializerToJSON();
+
+    void serialize() override;
+    DirsAndFiles deserialize() override;
 };
 
-class SerializerToTxt : public Serializer
+class SerializerToTxt : public i_Serializer
 {
     Scanner m_scanner;
 
 public:
-    void serialize();
-    DirsAndFiles deserialize();
+    virtual ~SerializerToTxt();
+
+    void serialize() override;
+    DirsAndFiles deserialize() override;
 };

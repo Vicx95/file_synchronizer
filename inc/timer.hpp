@@ -18,7 +18,13 @@ public:
 class Timer : public i_Timer
 {
 public:
+    Timer();
     virtual ~Timer();
+
+    Timer(const Timer &) = default;
+    Timer &operator=(const Timer &) = default;
+    Timer(Timer &&) = default;
+    Timer &operator=(Timer &&) = default;
 
     void start(const Interval &interval, const Callback &timeoutCallback) override;
     void stop() override;

@@ -13,8 +13,7 @@ int main()
 
     try
     {
-        Model m(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>());
-        Controller c(std::make_unique<View>(), &m);
+        Controller c;
         c.run();
     }
     catch (std::exception &e)

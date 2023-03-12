@@ -7,6 +7,10 @@ Scanner::Scanner()
     this->scanForChangedDirs(std::filesystem::current_path() / "../mainDirectory");
 }
 
+Scanner::~Scanner()
+{
+}
+
 void Scanner::scanForChangedDirs(const fs::path &dirPath)
 {
     if (!fs::exists(dirPath))

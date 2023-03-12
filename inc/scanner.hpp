@@ -23,7 +23,12 @@ class Scanner : public i_Scanner
 {
 public:
     Scanner();
-    virtual ~Scanner() = default;
+    virtual ~Scanner();
+
+    Scanner(const Scanner &) = default;
+    Scanner &operator=(const Scanner &) = default;
+    Scanner(Scanner &&) = default;
+    Scanner &operator=(Scanner &&) = default;
 
     void scan(const fs::path &dirPath) override;
     void scanForChangedDirs(const fs::path &dirPath) override;

@@ -1,5 +1,9 @@
 #include "..//inc/view.hpp"
 
+View::~View()
+{
+}
+
 void View::printMenu()
 {
     std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";
@@ -42,7 +46,7 @@ bool View::validateForPrinting(std::string name)
     }
     if (!fs::exists(fs::current_path() / name))
     {
-        std::cout << "Not exist file or directory\n";
+        std::cout << "File or directory doesn't exist\n";
         return false;
     }
     return true;
@@ -70,7 +74,14 @@ void View::printMessage(Message m)
     case Message::RemoveFile:
         std::cout << "Give folder name with files to delete: \n";
         break;
+    case Message::PrintFiles:
+        std::cout << "Give folder name or choose 'all' to print files: \n";
+        break;
+    case Message::FolderEmpty:
+        std::cout << "Folder is empty...";
+        break;
     default:
+        std::cout << "Message string not found";
         break;
     }
 }

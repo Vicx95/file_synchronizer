@@ -18,7 +18,12 @@ class FileSynchronizer : public i_FileSynchronizer
 {
 public:
     FileSynchronizer();
-    virtual ~FileSynchronizer() = default;
+    virtual ~FileSynchronizer();
+
+    FileSynchronizer(const FileSynchronizer &) = default;
+    FileSynchronizer &operator=(const FileSynchronizer &) = default;
+    FileSynchronizer(FileSynchronizer &&) = default;
+    FileSynchronizer &operator=(FileSynchronizer &&) = default;
 
     void synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles) override;
     void synchronizeRemoved(const std::vector<PathTimePair_t> &removedFiles) override;

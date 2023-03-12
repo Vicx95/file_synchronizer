@@ -1,10 +1,14 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
+#include <ctime>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <queue>
+#include <thread>
 #include <unordered_map>
 
 enum class LogLevel : uint8_t
@@ -23,16 +27,14 @@ struct enum_hasher
         return static_cast<std::size_t>(t);
     }
 };
-const std::unordered_map<LogLevel, std::string, enum_hasher> uncolored
-{
+const std::unordered_map<LogLevel, std::string, enum_hasher> uncolored{
     {LogLevel::ERROR, " [ERROR] "},
     {LogLevel::WARN, " [WARN] "},
     {LogLevel::INFO, " [INFO] "},
     {LogLevel::DEBUG, " [DEBUG] "},
 };
 
-const std::unordered_map<LogLevel, std::string, enum_hasher> colored
-{
+const std::unordered_map<LogLevel, std::string, enum_hasher> colored{
     {LogLevel::ERROR, " \x1b[31;1m[ERROR]\x1b[0m "},
     {LogLevel::WARN, " \x1b[33;1m[WARN]\x1b[0m "},
     {LogLevel::INFO, " \x1b[32;1m[INFO]\x1b[0m "},
@@ -61,8 +63,8 @@ public:
     virtual ~I_Logger() = default;
     I_Logger(const I_Logger &) = delete;
     I_Logger &operator=(const I_Logger &) = delete;
-    I_Logger(I_Logger&&) = delete;
-    I_Logger &operator=(I_Logger&&) = delete;
+    I_Logger(I_Logger &&) = delete;
+    I_Logger &operator=(I_Logger &&) = delete;
     virtual void prepareMessage(const std::string &, const LogLevel);
 
 protected:
@@ -74,7 +76,7 @@ protected:
     virtual void logMessage(const std::string &);
     virtual std::string makeTimestamp();
 
-private:    
+private:
     virtual void processEntries() = 0;
 };
 

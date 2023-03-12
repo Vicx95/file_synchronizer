@@ -1,5 +1,9 @@
 #include "..//inc/serializer.hpp"
 
+SerializerToJSON::~SerializerToJSON()
+{
+}
+
 void SerializerToJSON::serialize()
 {
 
@@ -52,6 +56,10 @@ DirsAndFiles SerializerToJSON::deserialize()
         files.push_back(filesInDir);
     }
     return {std::make_pair(Dirs, files)};
+}
+
+SerializerToTxt::~SerializerToTxt()
+{
 }
 
 void SerializerToTxt::serialize()

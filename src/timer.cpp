@@ -1,4 +1,7 @@
 #include "..//inc/timer.hpp"
+Timer::Timer()
+{
+}
 
 Timer::~Timer()
 {

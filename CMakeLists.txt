@@ -30,7 +30,7 @@ set(HEADERS
     )
 
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
-set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
+set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic -g)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 
 FetchContent_MakeAvailable(googletest)

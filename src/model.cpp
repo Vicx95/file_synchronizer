@@ -1,13 +1,25 @@
 // .cpp file
 #include "..//inc/model.hpp"
+#include "..//inc/file_synchronizer.hpp"
+#include "..//inc/scanner.hpp"
+#include "..//inc/serializer.hpp"
 #include "..//inc/thread_pool_provider.hpp"
-#include "..//inc/view.hpp"
+#include "..//inc/timer.hpp"
 
 namespace fs = std::filesystem;
 
+Model::Model()
+    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>())
+{
+}
+
+Model::~Model()
+{
+}
+
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
              std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
-             std::unique_ptr<i_Scanner> scanner)
+             std::unique_ptr<i_Scanner> scanner) noexcept
     : m_syncTimer(std::move(syncTimer)),               //
       m_fileSynchronizer(std::move(fileSynchronizer)), //
       m_scanner(std::move(scanner)),                   //
@@ -90,6 +102,23 @@ ErrorCode Model::removeFile(const std::string &dirName)
     return ErrorCode::FAIL;
 }
 
+ErrorCode Model::getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList)
+{
+    std::string dir = dirName == "all" ? dirName : static_cast<std::string>(m_mainDirectoryPath);
+
+    if (!fs::is_empty(m_mainDirectoryPath / dirName))
+    {
+        for (auto const &dirEntry : fs::recursive_directory_iterator(dir))
+        {
+            fileList.insert(dirEntry.path());
+        }
+
+        return ErrorCode::SUCCESS;
+    }
+
+    return ErrorCode::FAIL;
+}
+
 void Model::startSync()
 {
     m_syncTimer->start(m_interval, [this]() {
@@ -134,7 +163,7 @@ void Model::saveConfig()
 {
     fs::remove_all(std::filesystem::current_path() / "../configDirectory");
     std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
-    std::vector<std::unique_ptr<Serializer>> configurations;
+    std::vector<std::unique_ptr<i_Serializer>> configurations;
     configurations.emplace_back(std::make_unique<SerializerToJSON>());
     configurations.emplace_back(std::make_unique<SerializerToTxt>());
 

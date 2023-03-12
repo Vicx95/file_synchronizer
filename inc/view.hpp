@@ -10,6 +10,14 @@ namespace fs = std::filesystem;
 class View
 {
 public:
+    View() = default;
+    virtual ~View();
+
+    View(const View &) = default;
+    View &operator=(const View &) = default;
+    View(View &&) = default;
+    View &operator=(View &&) = default;
+
     enum class Message
     {
         Incorrect = 0,
@@ -17,7 +25,9 @@ public:
         DirExists,
         Interval,
         Remove,
-        RemoveFile
+        RemoveFile,
+        PrintFiles,
+        FolderEmpty
     };
 
     void printMenu();
