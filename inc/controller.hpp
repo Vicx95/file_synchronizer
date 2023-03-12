@@ -75,7 +75,7 @@ private:
     void forceSync();
     void readConfig();
     void saveConfig();
-    bool exit();
+    void exit();
 
     bool m_isExitRequested = false;
     static constexpr std::chrono::milliseconds Config_UISleepFor = 2000ms;

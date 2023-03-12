@@ -30,5 +30,9 @@ void Timer::start(const Interval &interval, const Callback &timeoutCallback)
 void Timer::stop()
 {
     m_timerIsRunning = false;
-    m_thread.join();
+
+    if (m_thread.joinable())
+    {
+        m_thread.join();
+    }
 }

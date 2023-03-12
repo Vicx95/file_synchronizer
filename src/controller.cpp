@@ -175,10 +175,10 @@ void Controller::saveConfig()
     m_model->saveConfig();
 }
 
-bool Controller::exit()
+void Controller::exit()
 {
     LOG_INFO("Stopping synchronizer");
     m_model->stopSync();
 
-    return true;
+    m_isExitRequested = true;
 }
