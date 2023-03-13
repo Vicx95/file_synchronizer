@@ -11,12 +11,7 @@ class View
 {
 public:
     View() = default;
-    virtual ~View();
-
-    View(const View &) = default;
-    View &operator=(const View &) = default;
-    View(View &&) = default;
-    View &operator=(View &&) = default;
+    ~View() = default;
 
     enum class Message
     {

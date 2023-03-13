@@ -16,6 +16,8 @@ using DirsAndFiles = std::pair<std::vector<std::string>, std::vector<std::vector
 class i_Serializer
 {
 public:
+    virtual ~i_Serializer() = default;
+
     virtual void serialize() = 0;
     virtual DirsAndFiles deserialize() = 0;
 };
@@ -25,8 +27,6 @@ class SerializerToJSON : public i_Serializer
     Scanner m_scanner;
 
 public:
-    virtual ~SerializerToJSON();
-
     void serialize() override;
     DirsAndFiles deserialize() override;
 };
@@ -36,8 +36,6 @@ class SerializerToTxt : public i_Serializer
     Scanner m_scanner;
 
 public:
-    virtual ~SerializerToTxt();
-
     void serialize() override;
     DirsAndFiles deserialize() override;
 };

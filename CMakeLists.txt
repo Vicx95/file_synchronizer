@@ -26,7 +26,6 @@ set(SOURCES
 
 set(HEADERS 
     inc/thread_pool.hpp
-    inc/thread_pool_provider.hpp
     )
 
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})

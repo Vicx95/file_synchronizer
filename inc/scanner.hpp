@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
+#include <iostream>
 #include <set>
 #include <vector>
 
@@ -13,6 +14,8 @@ using AddedRemovedVectorPair_t = std::pair<std::vector<PathTimePair_t>, std::vec
 class i_Scanner
 {
 public:
+    virtual ~i_Scanner() = default;
+
     virtual void scan(const fs::path &dirPath) = 0;
     virtual void scanForChangedDirs(const fs::path &dirPath) = 0;
     virtual AddedRemovedVectorPair_t comparePreviousAndRecentScanning() = 0;
@@ -23,12 +26,7 @@ class Scanner : public i_Scanner
 {
 public:
     Scanner();
-    virtual ~Scanner();
-
-    Scanner(const Scanner &) = default;
-    Scanner &operator=(const Scanner &) = default;
-    Scanner(Scanner &&) = default;
-    Scanner &operator=(Scanner &&) = default;
+    ~Scanner() = default;
 
     void scan(const fs::path &dirPath) override;
     void scanForChangedDirs(const fs::path &dirPath) override;

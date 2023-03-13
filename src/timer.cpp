@@ -1,7 +1,4 @@
 #include "..//inc/timer.hpp"
-Timer::Timer()
-{
-}
 
 Timer::~Timer()
 {
@@ -16,6 +13,7 @@ void Timer::start(const Interval &interval, const Callback &timeoutCallback)
     if (!m_timerIsRunning)
     {
         m_timerIsRunning = true;
+        std::cout << "Timer started";
 
         m_thread = std::thread([this, interval, timeoutCallback] {
             while (m_timerIsRunning)

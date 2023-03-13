@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils.hpp"
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -19,22 +21,14 @@ enum class LogLevel : uint8_t
     ERROR
 };
 
-struct enum_hasher
-{
-    template <typename T>
-    std::size_t operator()(T t) const
-    {
-        return static_cast<std::size_t>(t);
-    }
-};
-const std::unordered_map<LogLevel, std::string, enum_hasher> uncolored{
+const std::unordered_map<LogLevel, std::string, utils::EnumClassHash> uncolored{
     {LogLevel::ERROR, " [ERROR] "},
     {LogLevel::WARN, " [WARN] "},
     {LogLevel::INFO, " [INFO] "},
     {LogLevel::DEBUG, " [DEBUG] "},
 };
 
-const std::unordered_map<LogLevel, std::string, enum_hasher> colored{
+const std::unordered_map<LogLevel, std::string, utils::EnumClassHash> colored{
     {LogLevel::ERROR, " \x1b[31;1m[ERROR]\x1b[0m "},
     {LogLevel::WARN, " \x1b[33;1m[WARN]\x1b[0m "},
     {LogLevel::INFO, " \x1b[32;1m[INFO]\x1b[0m "},

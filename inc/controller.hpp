@@ -1,8 +1,10 @@
 #pragma once
 
 #include "model.hpp"
+#include "utils.hpp"
 #include "view.hpp"
 
+#include <atomic>
 #include <chrono>
 #include <functional>
 #include <optional>
@@ -15,10 +17,10 @@ class Controller
 {
 public:
     using pVoid = std::function<void(Controller *)>;
+
     Controller();
     explicit Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model) noexcept;
-
-    virtual ~Controller();
+    ~Controller() = default;
 
     void run();
 
@@ -45,16 +47,7 @@ private:
             Exit = 0
         };
 
-        struct EnumClassHash
-        {
-            template <typename T>
-            std::size_t operator()(T t) const
-            {
-                return static_cast<std::size_t>(t);
-            }
-        };
-
-        std::unordered_map<Handlers::Action, pVoid, EnumClassHash> m_handlerMap;
+        std::unordered_map<Handlers::Action, pVoid, utils::EnumClassHash> m_handlerMap;
     };
 
     void waitForButton();
@@ -77,7 +70,7 @@ private:
     void saveConfig();
     void exit();
 
-    bool m_isExitRequested = false;
+    std::atomic<bool> m_isExitRequested = false;
     static constexpr std::chrono::milliseconds Config_UISleepFor = 2000ms;
 
     std::unique_ptr<View> m_view = nullptr;

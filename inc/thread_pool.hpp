@@ -16,6 +16,7 @@ class Base
 {
 public:
     virtual ~Base() = default;
+
     virtual void operator()() = 0;
 };
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "logger.hpp"
 #include "thread_pool.hpp"
 
 #include <atomic>
@@ -32,15 +31,14 @@ public:
     }
 
 private:
-    ThreadPoolProvider()
+    ThreadPoolProvider() noexcept
+        : m_tp(std::make_unique<ThreadPool>())
     {
-        m_tp = std::make_unique<ThreadPool>();
-        LOG_INFO("Thread Pool Provider instantiated");
     }
 
     ~ThreadPoolProvider() = default;
     ThreadPoolProvider(const ThreadPoolProvider &) = delete;
     ThreadPoolProvider &operator=(const ThreadPoolProvider &) = delete;
 
-    std::unique_ptr<ThreadPool> m_tp;
+    std::unique_ptr<ThreadPool> m_tp = nullptr;
 };

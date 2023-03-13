@@ -9,10 +9,6 @@ Controller::Controller()
 {
 }
 
-Controller::~Controller()
-{
-}
-
 Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model) noexcept
     : m_view(std::move(view)), m_model(std::move(model))
 {
@@ -177,7 +173,6 @@ void Controller::saveConfig()
 
 void Controller::exit()
 {
-    LOG_INFO("Stopping synchronizer");
     m_model->stopSync();
 
     m_isExitRequested = true;

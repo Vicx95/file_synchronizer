@@ -1,9 +1,5 @@
 #include "..//inc/view.hpp"
 
-View::~View()
-{
-}
-
 void View::printMenu()
 {
     std::cout << "\n\n ### FILE SYNCHRONIZER ### \n\n";

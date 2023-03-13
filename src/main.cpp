@@ -9,12 +9,14 @@
 
 int main()
 {
-    LOG_INFO("Synchronizer starting");
-
     try
     {
+        // LOG_INFO("Synchronizer starting");
+
         Controller c;
         c.run();
+
+        LOG_INFO("Synchronizer starting");
     }
     catch (std::exception &e)
     {

@@ -1,4 +1,3 @@
-// .cpp file
 #include "..//inc/model.hpp"
 #include "..//inc/file_synchronizer.hpp"
 #include "..//inc/scanner.hpp"
@@ -9,20 +8,18 @@
 namespace fs = std::filesystem;
 
 Model::Model()
-    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>())
-{
-}
-
-Model::~Model()
+    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>(), std::make_unique<SerializerToJSON>())
 {
 }
 
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
              std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
-             std::unique_ptr<i_Scanner> scanner) noexcept
+             std::unique_ptr<i_Scanner> scanner,
+             std::unique_ptr<i_Serializer> serializer) noexcept
     : m_syncTimer(std::move(syncTimer)),               //
       m_fileSynchronizer(std::move(fileSynchronizer)), //
       m_scanner(std::move(scanner)),                   //
+      m_serializer(std::move(serializer)),             //
       m_interval(1000)                                 //
       {
 
@@ -152,7 +149,6 @@ fs::path Model::getMainDirectoryPath()
 
 void Model::readConfig()
 {
-    m_serializer = std::make_unique<SerializerToJSON>();
     fs::remove_all(m_mainDirectoryPath);
     fs::create_directory(m_mainDirectoryPath);
     auto [dirs, files] = m_serializer->deserialize();
@@ -163,12 +159,6 @@ void Model::saveConfig()
 {
     fs::remove_all(std::filesystem::current_path() / "../configDirectory");
     std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
-    std::vector<std::unique_ptr<i_Serializer>> configurations;
-    configurations.emplace_back(std::make_unique<SerializerToJSON>());
-    configurations.emplace_back(std::make_unique<SerializerToTxt>());
 
-    for (auto const &config : configurations)
-    {
-        config->serialize();
-    }
+    m_serializer->serialize();
 }

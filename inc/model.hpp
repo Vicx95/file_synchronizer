@@ -24,14 +24,10 @@ public:
     Model();
     explicit Model(std::unique_ptr<i_Timer> syncTimer,
                    std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
-                   std::unique_ptr<i_Scanner> scanner) noexcept;
+                   std::unique_ptr<i_Scanner> scanner,
+                   std::unique_ptr<i_Serializer> serializer) noexcept;
 
-    virtual ~Model();
-
-    Model(const Model &) = default;
-    Model &operator=(const Model &) = default;
-    Model(Model &&) = default;
-    Model &operator=(Model &&) = default;
+    virtual ~Model() = default;
 
     ErrorCode addDirectory(const std::string &dirName);
     ErrorCode removeDirectory(const std::string &dirName);

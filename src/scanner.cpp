@@ -1,14 +1,10 @@
 #include "..//inc/scanner.hpp"
-#include "..//inc/logger.hpp"
+//#include "..//inc/logger.hpp"
 
 Scanner::Scanner()
 {
     m_recentScanning.reserve(1024);
     this->scanForChangedDirs(std::filesystem::current_path() / "../mainDirectory");
-}
-
-Scanner::~Scanner()
-{
 }
 
 void Scanner::scanForChangedDirs(const fs::path &dirPath)
@@ -72,7 +68,7 @@ void Scanner::logScanResult(const AddedRemovedVectorPair_t &vecPair)
         {
             std::string filename = p.first.filename();
             msg.append(filename);
-            LOG_INFO(msg);
+            //LOG_INFO(msg);
         } };
 
     std::ranges::for_each(vecPair.first, log);
