@@ -29,7 +29,7 @@ void I_Logger::logMessage(const std::string &message)
 {
     std::unique_lock lock(m_queueMutex);
     m_messageQueue.push(message);
-    m_condVar.notify_all();
+    m_condVar.notify_one();
 }
 
 FileLogger::FileLogger()
@@ -40,6 +40,8 @@ FileLogger::FileLogger()
 FileLogger::~FileLogger()
 {
     m_exit = true;
+
+    m_condVar.notify_one();
     m_loggingThread.join();
 }
 
@@ -55,17 +57,12 @@ void FileLogger::processEntries()
     while (!m_exit)
     {
         std::unique_lock lock(m_queueMutex);
+        m_condVar.wait(lock, [this] { return (!m_messageQueue.empty() or m_exit); });
 
-        m_condVar.wait(lock, [this] { return !m_messageQueue.empty(); });
-
-        logFile << m_messageQueue.front() << std::endl;
-        m_messageQueue.pop();
-    }
-
-    // exit condition
-    while (m_exit && !m_messageQueue.empty())
-    {
-        logFile << m_messageQueue.front() << std::endl;
-        m_messageQueue.pop();
+        if (!m_messageQueue.empty())
+        {
+            logFile << m_messageQueue.front() << std::endl;
+            m_messageQueue.pop();
+        }
     }
 }
