@@ -1,34 +1,41 @@
 #pragma once
 
-#include "../inc/nlohmann/json.hpp"
-#include "../inc/scanner.hpp"
+#include "nlohmann/json.hpp"
+#include "scanner.hpp"
+
+#include <fstream>
+#include <iostream> // TODO: delete
 #include <set>
+#include <vector>
+
+namespace fs = std::filesystem;
 
 using json = nlohmann::json;
-namespace fs = std::filesystem;
 using DirsAndFiles = std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>>;
 
-class Serializer {
-
-
+class i_Serializer
+{
 public:
+    virtual ~i_Serializer() = default;
 
     virtual void serialize() = 0;
     virtual DirsAndFiles deserialize() = 0;
-    virtual ~Serializer() {}
 };
 
-class SerializerToJSON : public Serializer{
+class SerializerToJSON : public i_Serializer
+{
     Scanner m_scanner;
-public:
-    void serialize();
-    DirsAndFiles deserialize();
 
+public:
+    void serialize() override;
+    DirsAndFiles deserialize() override;
 };
 
-class SerializerToTxt : public Serializer{
+class SerializerToTxt : public i_Serializer
+{
     Scanner m_scanner;
+
 public:
-    void serialize();
-    DirsAndFiles deserialize();
+    void serialize() override;
+    DirsAndFiles deserialize() override;
 };

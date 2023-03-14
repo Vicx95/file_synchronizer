@@ -1,36 +1,153 @@
 #include "..//inc/controller.hpp"
 #include "..//inc/logger.hpp"
+#include "..//inc/model.hpp"
+#include "..//inc/thread_pool_provider.hpp"
+#include "..//inc/view.hpp"
 
-Controller::Controller(View *view, Model *model)
-    : m_view(view), m_model(model)
+Controller::Controller()
+    : Controller(std::make_unique<View>(), std::make_unique<Model>())
 {
-    m_view->setMainDirectoryPath(m_model->getMainDirectoryPath());
-
 }
 
-void Controller::addDirectory(std::istream &std_input)
+Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model) noexcept
+    : m_view(std::move(view)), m_model(std::move(model))
 {
-    m_model->addDirectory(std_input);
+    this->init();
 }
+
+void Controller::run()
+{
+    while (!m_isExitRequested)
+    {
+        m_view->printMenu();
+        m_view->printOptions();
+
+        if (auto input = getKeyboardInput(); !input.has_value())
+        {
+            std::this_thread::sleep_for(Config_UISleepFor);
+            m_view->printMessage(View::Message::Incorrect);
+
+            continue;
+        }
+        else if (Handlers::Action mappedKey = static_cast<Handlers::Action>(std::stoul(input.value())); h.m_handlerMap.contains(mappedKey))
+        {
+            std::invoke(h.m_handlerMap.at(mappedKey), this);
+        }
+    }
+}
+
+void Controller::init()
+{
+    h.m_handlerMap = {
+        {Handlers::Action::AddDir, &Controller::addDirectory}, //
+        {Handlers::Action::RemoveDir, &Controller::removeDirectory},
+        {Handlers::Action::RemoveFile, &Controller::removeFile},
+        {Handlers::Action::PrintDir, &Controller::printDirectory},
+        {Handlers::Action::PrintFiles, &Controller::printFiles},
+        {Handlers::Action::SetIntervalTime, &Controller::setIntervalTime},
+        {Handlers::Action::StartSync, &Controller::startSync},
+        {Handlers::Action::StopSync, &Controller::stopSync},
+        {Handlers::Action::ForceSync, &Controller::forceSync},
+        {Handlers::Action::ReadConfig, &Controller::readConfig},
+        {Handlers::Action::SaveConfig, &Controller::saveConfig},
+        {Handlers::Action::Exit, &Controller::exit} //
+    };
+}
+
+void Controller::waitForButton()
+{
+    std::system("/bin/bash -c \"read -n 1 -s -p \"PressAnyKeyToContinue...\"\"");
+}
+
+std::optional<std::string> Controller::getKeyboardInput(std::regex keyRegex)
+{
+    // TODO: prepare regexes
+    std::string input;
+
+    std::cin.clear();
+    std::cin >> input;
+
+    if (!std::regex_search(input, keyRegex))
+    {
+        return {};
+    }
+
+    return input;
+}
+
+void Controller::process(auto fun)
+{
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        if (ErrorCode::SUCCESS != std::invoke(fun, this->m_model, input.value()))
+        {
+            m_view->printMessage(View::Message::DirExists);
+            waitForButton();
+        }
+    }
+    else
+    {
+        m_view->printMessage(View::Message::Incorrect);
+        std::this_thread::sleep_for(Config_UISleepFor);
+    }
+}
+
+void Controller::addDirectory()
+{
+    m_model->createMainDir();
+    m_view->printMessage(View::Message::GiveFolder);
+
+    this->process(&Model::addDirectory);
+}
+
 void Controller::removeDirectory()
 {
-    m_model->removeDirectory();
+    m_view->printMessage(View::Message::Remove);
+
+    this->process(&Model::removeDirectory);
 }
 void Controller::removeFile()
 {
-    m_model->removeFile();
+    m_view->printMessage(View::Message::RemoveFile);
+
+    this->process(&Model::removeFile);
 }
 void Controller::printDirectory()
 {
-    m_view->printDirectory();
+    m_view->printDirectory(m_model->getMainDirectoryPath());
+    this->waitForButton();
 }
 void Controller::printFiles()
 {
-    m_view->printFiles();
+    std::set<fs::path> fileList;
+
+    m_view->printMessage(View::Message::PrintFiles);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        if (ErrorCode::SUCCESS != m_model->getAllFilesInDir(input.value(), fileList))
+        {
+            m_view->printMessage(View::Message::FolderEmpty);
+            waitForButton();
+        }
+    }
+    else
+    {
+        m_view->printMessage(View::Message::Incorrect);
+        std::this_thread::sleep_for(Config_UISleepFor);
+    }
+
+    m_view->printFiles(fileList);
+    this->waitForButton();
 }
-void Controller::setIntervalTime(std::istream &std_input)
+void Controller::setIntervalTime()
 {
-    m_model->setIntervalTime(std_input);
+    m_view->printMessage(View::Message::Interval);
+
+    if (auto input = getKeyboardInput(); input.has_value())
+    {
+        m_model->setIntervalTime(input.value());
+    }
 }
 void Controller::startSync()
 {
@@ -42,7 +159,7 @@ void Controller::stopSync()
 }
 void Controller::forceSync()
 {
-     m_model->forceSync();
+    m_model->forceSync();
 }
 
 void Controller::readConfig()
@@ -54,9 +171,9 @@ void Controller::saveConfig()
     m_model->saveConfig();
 }
 
-bool Controller::exit()
+void Controller::exit()
 {
-    LOG_INFO("Stopping synchronizer");
     m_model->stopSync();
-    return true;
+
+    m_isExitRequested = true;
 }

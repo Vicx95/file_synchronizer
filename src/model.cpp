@@ -1,20 +1,44 @@
-// .cpp file
 #include "..//inc/model.hpp"
-#include "..//inc/view.hpp"
-
-#include <chrono>
-#include <iostream>
+#include "..//inc/file_synchronizer.hpp"
+#include "..//inc/scanner.hpp"
+#include "..//inc/serializer.hpp"
+#include "..//inc/thread_pool_provider.hpp"
+#include "..//inc/timer.hpp"
 
 namespace fs = std::filesystem;
 
-Model::Model(i_Timer *syncTimer, i_FileSynchronizer *fileSynchronizer, i_Scanner *scanner)
-    : m_syncTimer(syncTimer), m_fileSynchronizer(fileSynchronizer), m_scanner(scanner), m_interval(1000){
-
-};
-
-ErrorCode Model::addDirectory(std::istream &std_input)
+Model::Model()
+    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>(), std::make_unique<SerializerToJSON>())
 {
+}
 
+Model::Model(std::unique_ptr<i_Timer> syncTimer,
+             std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
+             std::unique_ptr<i_Scanner> scanner,
+             std::unique_ptr<i_Serializer> serializer) noexcept
+    : m_syncTimer(std::move(syncTimer)),               //
+      m_fileSynchronizer(std::move(fileSynchronizer)), //
+      m_scanner(std::move(scanner)),                   //
+      m_serializer(std::move(serializer)),             //
+      m_interval(1000)                                 //
+      {
+
+      };
+
+ErrorCode Model::addDirectory(const std::string &dirName)
+{
+    if (!fs::exists(fs::current_path() / dirName))
+    {
+        fs::create_directory(dirName);
+
+        return ErrorCode::SUCCESS;
+    }
+
+    return ErrorCode::FAIL;
+}
+
+void Model::createMainDir()
+{
     try
     {
         fs::current_path(m_mainDirectoryPath);
@@ -25,69 +49,39 @@ ErrorCode Model::addDirectory(std::istream &std_input)
         fs::create_directory(m_mainDirectoryPath);
         fs::current_path(m_mainDirectoryPath);
     }
-
-    std::cout << "Give folder name to add: \n";
-    std::string dirName;
-    std_input.clear();
-    std_input >> dirName;
-    if (!fs::exists(fs::current_path() / dirName))
-    {
-        fs::create_directory(dirName);
-        return ErrorCode::SUCCESS;
-    }
-    else
-    {
-        std::cout << "Dir already exist...\n";
-        View::waitForButton();
-        return ErrorCode::FAIL;
-    }
 }
 
-void Model::setIntervalTime(std::istream &std_input)
+void Model::setIntervalTime(const std::string &strInterval)
 {
-    std::cout << "Interval time value [milliseconds]: \n";
-    int64_t input;
+    m_interval = static_cast<std::chrono::duration<int64_t, std::milli>>(std::stoll(strInterval));
+}
 
-    std_input.clear();
-    std_input >> input;
-
-    std::chrono::duration<int64_t, std::milli> _interval(input);
-    m_interval = _interval;
+void Model::setIntervalTime(std::chrono::duration<int64_t, std::milli> interval)
+{
+    m_interval = interval;
 }
 
 bool Model::validateForRemoval(std::string name)
 {
-    if (!fs::exists(fs::current_path() / name))
-    {
-        std::cout << "Not exist file or directory\n";
-        View::waitForButton();
-        return false;
-    }
-    return true;
+    fs::current_path(m_mainDirectoryPath);
+
+    return !fs::exists(fs::current_path() / name);
 }
 
-ErrorCode Model::removeDirectory()
+ErrorCode Model::removeDirectory(const std::string &dirName)
 {
-    fs::current_path(m_mainDirectoryPath);
-    std::cout << "Give folder name to remove: \n";
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
     if (validateForRemoval(dirName))
     {
         fs::remove_all(dirName);
+
         return ErrorCode::SUCCESS;
     }
     return ErrorCode::FAIL;
 }
 
-ErrorCode Model::removeFile()
+ErrorCode Model::removeFile(const std::string &dirName)
 {
-    std::cout << "Give folder name with files to delete: \n";
-    fs::current_path(m_mainDirectoryPath);
-    std::string dirName;
-    std::cin.clear();
-    std::cin >> dirName;
+    // TODO finish refactoring
     if (validateForRemoval(dirName))
     {
         fs::current_path(m_mainDirectoryPath / dirName);
@@ -98,21 +92,34 @@ ErrorCode Model::removeFile()
         if (validateForRemoval(fileName))
         {
             fs::remove(fileName);
+
             return ErrorCode::SUCCESS;
         }
     }
     return ErrorCode::FAIL;
 }
 
+ErrorCode Model::getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList)
+{
+    std::string dir = dirName == "all" ? dirName : static_cast<std::string>(m_mainDirectoryPath);
+
+    if (!fs::is_empty(m_mainDirectoryPath / dirName))
+    {
+        for (auto const &dirEntry : fs::recursive_directory_iterator(dir))
+        {
+            fileList.insert(dirEntry.path());
+        }
+
+        return ErrorCode::SUCCESS;
+    }
+
+    return ErrorCode::FAIL;
+}
+
 void Model::startSync()
 {
     m_syncTimer->start(m_interval, [this]() {
-        m_scanner->scan(m_mainDirectoryPath);
-        auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
-        m_fileSynchronizer->synchronizeAdded(outputComparing.first);
-        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
-        m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
-        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+        this->forceSync();
     });
 }
 
@@ -123,13 +130,16 @@ void Model::stopSync()
 
 void Model::forceSync()
 {
+    auto future = ThreadPoolProvider::instance().getThreadPool()->submit([&]() { //
         m_scanner->scan(m_mainDirectoryPath);
-        auto outputComparing = m_scanner->comparePreviousAndRecentScanning();
-        m_fileSynchronizer->synchronizeAdded(outputComparing.first);
-        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
-        m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
-        m_scanner->scanForChangedDirs(m_mainDirectoryPath);
+        return m_scanner->comparePreviousAndRecentScanning();
+    });
+    auto outputComparing = future.get();
 
+    // TODO integrate thread pool
+    m_fileSynchronizer->synchronizeAdded(outputComparing.first);
+    m_fileSynchronizer->synchronizeRemoved(outputComparing.second);
+    m_scanner->scanForChangedDirs(m_mainDirectoryPath);
 }
 
 fs::path Model::getMainDirectoryPath()
@@ -137,23 +147,18 @@ fs::path Model::getMainDirectoryPath()
     return m_mainDirectoryPath;
 }
 
-
-void Model::readConfig(){
-    m_serializer = std::make_unique<SerializerToJSON>(); 
+void Model::readConfig()
+{
     fs::remove_all(m_mainDirectoryPath);
     fs::create_directory(m_mainDirectoryPath);
     auto [dirs, files] = m_serializer->deserialize();
     std::filesystem::copy(m_mainDirectoryPath / "../configDirectory", m_mainDirectoryPath, std::filesystem::copy_options::recursive);
 }
 
-void Model::saveConfig(){
+void Model::saveConfig()
+{
     fs::remove_all(std::filesystem::current_path() / "../configDirectory");
     std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
-    std::vector<std::unique_ptr<Serializer>> configurations;
-    configurations.emplace_back(std::make_unique<SerializerToJSON>());
-    configurations.emplace_back(std::make_unique<SerializerToTxt>());
 
-    for(auto const& config : configurations){
-        config->serialize();
-    }    
+    m_serializer->serialize();
 }
