@@ -21,10 +21,15 @@ set(SOURCES
     src/scanner.cpp
     src/serializer.cpp
     src/logger.cpp
+    #src/thread_pool.cpp
     )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic)
+set(HEADERS 
+    inc/thread_pool.hpp
+    )
+
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
+set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic -g)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 
 FetchContent_MakeAvailable(googletest)

@@ -1,11 +1,5 @@
 #include "..//inc/file_synchronizer.hpp"
 
-#include <iostream>
-
-FileSynchronizer::FileSynchronizer()
-{
-}
-
 void FileSynchronizer::synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles)
 {
     for (auto el : addedFiles)

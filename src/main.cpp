@@ -1,29 +1,28 @@
-#include "..//inc/file_synchronizer.hpp"
-#include "..//inc/scanner.hpp"
 #include "..//inc/controller.hpp"
+#include "..//inc/file_synchronizer.hpp"
+#include "..//inc/logger.hpp"
 #include "..//inc/model.hpp"
+#include "..//inc/scanner.hpp"
+#include "..//inc/serializer.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
-#include "..//inc/serializer.hpp"
-#include "..//inc/logger.hpp"
-
-#include <chrono> // chrono::system_clock
-#include <ctime>
-#include <iostream>
-#include <sstream>
-#include <string>
 
 int main()
 {
-    LOG_INFO("Synchronizer starting");
-    Timer tm;
-    View v;
-    Scanner scanner;
-    FileSynchronizer sync;
+    try
+    {
+        LOG_INFO("Synchronizer starting");
 
-    Model m(&tm, &sync, &scanner);
-    Controller c(&v, &m);
-    v.setListener(&c);
-    v.run();
-    
+        Controller c;
+        c.run();
+
+        LOG_INFO("Synchronizer stopping");
+    }
+    catch (std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
