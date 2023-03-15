@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <ftxui/dom/table.hpp> // for Table, TableSelection
 #include <iostream>
 #include <set>
 #include <string>
@@ -33,5 +34,32 @@ public:
     void printMessage(Message m);
 
 private:
+    bool validateForPrinting(std::string name);
+};
+
+class ViewFTXuserInterface : public View
+{
+public:
+    void run();
+    void printDirectory();
+    void printFiles();
+
+    std::vector<std::vector<std::string>> printDir();
+    std::vector<std::vector<std::string>> printAllFiles();
+
+    std::string get_permission_string(fs::perms permission);
+    void generateColorTable(ftxui::Table *table);
+    void refreshDir(std::vector<std::string> &dirNames);
+};
+
+class ViewConsoleUserInterface : public View
+{
+public:
+    void run();
+    void printDirectory();
+    void printFiles();
+    void printMenu();
+    void printOptions();
+    static void waitForButton();
     bool validateForPrinting(std::string name);
 };

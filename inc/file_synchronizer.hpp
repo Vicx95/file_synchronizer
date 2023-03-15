@@ -24,4 +24,5 @@ public:
 
     void synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles) override;
     void synchronizeRemoved(const std::vector<PathTimePair_t> &removedFiles) override;
+    const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 };

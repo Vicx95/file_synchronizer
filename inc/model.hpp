@@ -40,8 +40,9 @@ public:
     void startSync();
     void stopSync();
     void forceSync();
-    void readConfig();
+    void readConfig(std::istream &std_input);
     void saveConfig();
+    void addConfig(std::istream &std_input);
     fs::path getMainDirectoryPath();
 
 private:
@@ -53,5 +54,7 @@ private:
     std::unique_ptr<i_Serializer> m_serializer = nullptr;
 
     std::chrono::duration<int64_t, std::milli> m_interval;
+    bool m_syncStarted = false;
+    std::mutex m_mutex;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
 };

@@ -164,7 +164,7 @@ void Controller::forceSync()
 
 void Controller::readConfig()
 {
-    m_model->readConfig();
+    m_model->readConfig(std::cin);
 }
 void Controller::saveConfig()
 {
