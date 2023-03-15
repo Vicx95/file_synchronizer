@@ -64,8 +64,7 @@ void Model::setIntervalTime(std::chrono::duration<int64_t, std::milli> interval)
 bool Model::validateForRemoval(std::string name)
 {
     fs::current_path(m_mainDirectoryPath);
-
-    return !fs::exists(fs::current_path() / name);
+    return fs::exists(fs::current_path() / name);
 }
 
 ErrorCode Model::removeDirectory(const std::string &dirName)
@@ -81,7 +80,6 @@ ErrorCode Model::removeDirectory(const std::string &dirName)
 
 ErrorCode Model::removeFile(const std::string &dirName)
 {
-    // TODO finish refactoring
     if (validateForRemoval(dirName))
     {
         fs::current_path(m_mainDirectoryPath / dirName);
@@ -89,9 +87,9 @@ ErrorCode Model::removeFile(const std::string &dirName)
         std::string fileName;
         std::cin.clear();
         std::cin >> fileName;
-        if (validateForRemoval(fileName))
+        if (validateForRemoval(dirName + "/" + fileName))
         {
-            fs::remove(fileName);
+            fs::remove(m_mainDirectoryPath / dirName / fileName);
 
             return ErrorCode::SUCCESS;
         }
@@ -101,11 +99,9 @@ ErrorCode Model::removeFile(const std::string &dirName)
 
 ErrorCode Model::getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList)
 {
-    std::string dir = dirName == "all" ? dirName : static_cast<std::string>(m_mainDirectoryPath);
-
-    if (!fs::is_empty(m_mainDirectoryPath / dirName))
+    if (!fs::is_empty(dirName))
     {
-        for (auto const &dirEntry : fs::recursive_directory_iterator(dir))
+        for (auto const &dirEntry : fs::recursive_directory_iterator(dirName))
         {
             fileList.insert(dirEntry.path());
         }
