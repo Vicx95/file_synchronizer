@@ -125,7 +125,13 @@ void Controller::printFiles()
 
     if (auto input = getKeyboardInput(); input.has_value())
     {
-        if (ErrorCode::SUCCESS != m_model->getAllFilesInDir(input.value(), fileList))
+        if (input.value() == "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath(),fileList))
+        {
+            m_view->printMessage(View::Message::FolderEmpty);
+            waitForButton();
+        }
+
+        if(input.value() != "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath() / input.value(),fileList))
         {
             m_view->printMessage(View::Message::FolderEmpty);
             waitForButton();
