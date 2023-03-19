@@ -11,6 +11,21 @@ FetchContent_Declare(
   GIT_TAG release-1.12.1
 )
 
+# --- Fetch FTXUI --------------------------------------------------------------
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+  # Important: Specify a GIT_TAG XXXXX here.
+)
+ 
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+  FetchContent_Populate(ftxui)
+  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+ 
+# ------------------------------------------------------------------------------
+
 set(SOURCES 
     src/controller.cpp
     src/main.cpp
@@ -31,6 +46,7 @@ set(HEADERS
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic -g)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
+target_include_directories(file_synchronizer PRIVATE src)
 
 FetchContent_MakeAvailable(googletest)
 
@@ -39,9 +55,13 @@ set(UT-SOURCES
     tests/model_ut.cpp
     )
 
-add_library(${PROJECT_NAME}-lib STATIC ${SOURCES})
 add_executable(${PROJECT_NAME}-ut ${UT-SOURCES})
 link_libraries(gmock)
-target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock ${PROJECT_NAME}-lib)
+target_link_libraries(${PROJECT_NAME}-ut gtest_main gmock ftxui::screen ftxui::dom ftxui::component)
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::dom
+  PRIVATE ftxui::component # Not needed for this example.
+)
 target_compile_options(${PROJECT_NAME}-ut PRIVATE ${FLAGS})
 add_test(NAME ${PROJECT_NAME}-test COMMAND ${PROJECT_NAME}-ut)

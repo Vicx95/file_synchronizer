@@ -5,7 +5,7 @@
 #include "..//inc/view.hpp"
 
 Controller::Controller()
-    : Controller(std::make_unique<View>(), std::make_unique<Model>())
+    : Controller(std::make_unique<ViewConsoleUserInterface>(), std::make_unique<Model>())
 {
 }
 
@@ -17,6 +17,9 @@ Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model)
 
 void Controller::run()
 {
+    //if(typeid(m_view) == typeid(ViewFTXuserInterface))
+    m_view->run();
+    /*
     while (!m_isExitRequested)
     {
         m_view->printMenu();
@@ -34,6 +37,7 @@ void Controller::run()
             std::invoke(h.m_handlerMap.at(mappedKey), this);
         }
     }
+    */
 }
 
 void Controller::init()
