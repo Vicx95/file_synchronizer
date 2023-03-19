@@ -106,15 +106,15 @@ void View::printFiles(const std::set<fs::path> &fileDirList)
 }
 
 
-void ViewConsoleUserInterface::run()
+void ViewConsoleUserInterface::run(const fs::path &path)
 {
-    
+        fs::path spath = path;
         printMenu();
         printOptions();
 
 }
 
-void ViewFTXuserInterface::run()
+void ViewFTXuserInterface::run(const fs::path &path)
 {
     float value = 50.0f;
     auto screen = ScreenInteractive::Fullscreen(); //FitComponent();
@@ -133,7 +133,7 @@ void ViewFTXuserInterface::run()
     std::mutex cv_mutex;
     std::atomic<bool> refresh_ui_continue = true;
 
-    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, dirNamesX, screen);
+    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, dirNamesX, screen, path);
 
     Component container = Container::Horizontal({
       buttons,
@@ -149,18 +149,21 @@ void ViewFTXuserInterface::run()
 //----------------------------------------------------------------------
 // Print logo-graph
 //----------------------------------------------------------------------
-  Element document = graph([](int x, int y) {
-    std::vector<int> result(50, 0);
-    for (int i=0; i < x; ++i) {
-      result.push_back(((3 * i) / 2) % y);
-    }
-    return result;
-  });
+  ftxui::Element logoGraph = printLogoGraph();
+  logoGraph |= bgcolor(Color::DarkBlue);
+  logoGraph |= border;
 
- // document |= color(Color::Green3);
-  document |= bgcolor(Color::DarkBlue);
-  document |= border;
+//---------------------------------------------------------------------
+// Print directory and files
+//---------------------------------------------------------------------
+  ftxui::Table tableDirs = printDir(path);
+  ftxui::Table tableFiles = printAllFiles(path);
+    generateColorTable(&tableDirs);
+    generateColorTable(&tableFiles);
 
+
+  Element printDirTable = tableDirs.Render();
+  Element printFilesTable = tableFiles.Render();
 //---------------------------------------------------------------------
 // Render screen
 //---------------------------------------------------------------------
@@ -173,9 +176,9 @@ void ViewFTXuserInterface::run()
                separator(),
                buttons->Render() | color(Color::Orange1),
                separator(),
-               document,
-              /// showTableDir ?  printDirTable | hcenter : emptyElement(),
-             //  showTableFile ? printFilesTable | hcenter : emptyElement(),
+               logoGraph,
+               showTableDir ?  printDirTable | hcenter : emptyElement(),
+               showTableFile ? printFilesTable | hcenter : emptyElement(),
             //    showAddDir ?
             //    vbox({ 
             //    separator(),
@@ -195,13 +198,13 @@ void ViewFTXuserInterface::run()
   screen.Loop(component);
 }
 
-ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool*> &showButtons, std::condition_variable& cv, std::atomic<bool>& refresh_ui_continue, std::vector<std::string>& dirNamesX, ftxui::ScreenInteractive& screen)
+ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool*> &showButtons, std::condition_variable& cv, std::atomic<bool>& refresh_ui_continue, std::vector<std::string>& dirNamesX, ftxui::ScreenInteractive& screen, const fs::path &path)
 {
 // The tree of components. This defines how to navigate using the keyboard.
   auto buttons = Container::Horizontal({
       Button("Add dir", [&] { hideMenuButtons(showButtons); *showButtons[0] = true; }),
       Button("Remove Dir", [&] { hideMenuButtons(showButtons); *showButtons[1] = true; }),
-      Button("Remove File", [&] { hideMenuButtons(showButtons); *showButtons[2] = true; refreshDir(dirNamesX);}),
+      Button("Remove File", [&] { hideMenuButtons(showButtons); *showButtons[2] = true; refreshDir(dirNamesX, path);}),
       Button("Print Dirs", [&] { hideMenuButtons(showButtons); *showButtons[3] = true; }),
       Button("Print files", [&] { hideMenuButtons(showButtons); *showButtons[4] = true; }),
       Button("Set int-val", [&] { hideMenuButtons(showButtons); *showButtons[5] = true; }),
@@ -235,15 +238,118 @@ void ViewFTXuserInterface::hideMenuButtons(std::deque<bool*> &showButtons)
     }
 }
 
-void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames)
+void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames, const fs::path &path)
 {
     std::vector<std::string> vec = dirNames;
-    /*
+    
     dirNames.clear();
-    for (auto const &entry : fs::directory_iterator(m_mainDirectoryPath))  //directory_iterator
+    for (auto const &entry : fs::directory_iterator(path))  //directory_iterator
     {
         dirNames.push_back(entry.path().filename().string());
     }
     std::sort(dirNames.begin(), dirNames.end());
-    */
+    
+}
+
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printDir(const fs::path &path)
+{
+    fs::current_path(path);
+
+    std::vector<std::vector<std::string>> rows;
+    rows.push_back({ "Directory Name", "Modification Time", "Size", "Permissions" });
+  
+
+    for (auto const &entry : fs::directory_iterator(path))  //directory_iterator
+    {        
+        auto file = entry.path();
+        auto file_time = fs::last_write_time(file);
+        //auto file_size = 0;//fs::file_size(file);
+        auto file_perms = fs::status(file).permissions();
+        //std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
+        std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(fs::file_time_type::clock::time_point(file_time)));
+
+        std::string modification_time = std::ctime(&cftime);
+
+        rows.push_back({ file.filename().string(), modification_time, std::to_string(0) + " Bytes", get_permission_string(file_perms) }); 
+    }
+    std::sort(rows.begin()+1, rows.end());
+
+    return rows;
+ 
+}
+
+std::vector<std::vector<std::string>> ViewFTXuserInterface::printAllFiles(const fs::path &path)
+{
+    std::set<fs::path> sorted_by_name;
+
+    std::vector<std::vector<std::string>> rows;
+    rows.push_back({ "File Name", "Modification Time", "Size", "Permissions" });
+
+
+    for (auto const &entry : fs::recursive_directory_iterator(path))  //directory_iterator
+    {
+        if (entry.is_regular_file()) {
+            auto file = entry.path();
+            auto file_time = fs::last_write_time(file);
+            auto file_size = fs::file_size(file);
+            auto file_perms = fs::status(file).permissions();
+            //std::time_t cftime = decltype(file_time)::clock::to_time_t(file_time);
+            std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(fs::file_time_type::clock::time_point(file_time)));
+
+            std::string modification_time = std::ctime(&cftime);
+
+            rows.push_back({ file.filename().string(), modification_time, std::to_string(file_size) + "KB", get_permission_string(file_perms) });  //std::to_string(file_perms)
+        }
+    }
+
+    return rows;
+}
+
+void ViewFTXuserInterface::generateColorTable(ftxui::Table* table)
+{
+  table->SelectAll().Border(LIGHT);
+ 
+  // Add border around the first column.
+  table->SelectColumn(0).Border(LIGHT);
+ 
+  // Make first row bold with a double border.
+  table->SelectRow(0).Decorate(bold);
+  table->SelectRow(0).SeparatorVertical(LIGHT);
+  table->SelectRow(0).Border(DOUBLE);
+ 
+  // Align right the "Release date" column.
+  table->SelectColumn(2).DecorateCells(align_right);
+ 
+  // Select row from the second to the last.
+  auto content = table->SelectRows(1, -1);
+  // Alternate in between 3 colors.
+  content.DecorateCellsAlternateRow(color(Color::Blue), 3, 0);
+  content.DecorateCellsAlternateRow(color(Color::Cyan), 3, 1);
+  content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
+}
+
+ftxui::Element ViewFTXuserInterface::printLogoGraph()
+{
+    Element document = graph([](int x, int y) {
+    std::vector<int> result(50, 0);
+    for (int i=0; i < x; ++i) {
+      result.push_back(((3 * i) / 2) % y);
+    }
+    return result;
+  });
+  return document;
+}
+
+std::string ViewFTXuserInterface::get_permission_string(fs::perms permission) {
+  std::stringstream ss;
+  ss << ((permission & fs::perms::owner_read) != fs::perms::none ? "r" : "-");
+  ss << ((permission & fs::perms::owner_write) != fs::perms::none ? "w" : "-");
+  ss << ((permission & fs::perms::owner_exec) != fs::perms::none ? "x" : "-");
+  ss << ((permission & fs::perms::group_read) != fs::perms::none ? "r" : "-");
+  ss << ((permission & fs::perms::group_write) != fs::perms::none ? "w" : "-");
+  ss << ((permission & fs::perms::group_exec) != fs::perms::none ? "x" : "-");
+  ss << ((permission & fs::perms::others_read) != fs::perms::none ? "r" : "-");
+  ss << ((permission & fs::perms::others_write) != fs::perms::none ? "w" : "-");
+  ss << ((permission & fs::perms::others_exec) != fs::perms::none ? "x" : "-");
+  return ss.str();
 }

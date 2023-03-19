@@ -18,7 +18,7 @@ Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model)
 void Controller::run()
 {
     //if(typeid(m_view) == typeid(ViewFTXuserInterface))
-    m_view->run();
+    m_view->run(m_model->getMainDirectoryPath());
     /*
     while (!m_isExitRequested)
     {
