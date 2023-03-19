@@ -1,5 +1,7 @@
 #include "..//inc/view.hpp"
 
+#include <sstream>
+
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
@@ -135,16 +137,6 @@ void ViewFTXuserInterface::run(const fs::path &path)
 
     auto buttons = createButtons(showButtons, cv, refresh_ui_continue, dirNamesX, screen, path);
 
-    Component container = Container::Horizontal({
-      buttons,
-      //input_first_name,
-    //   inputAdd,
-    //   inputRemove,
-    //   IntervalButtons,
-    //   layoutRemoveFile,
-    //   gauge_component,
-    });
-
 
 //----------------------------------------------------------------------
 // Print logo-graph
@@ -164,6 +156,84 @@ void ViewFTXuserInterface::run(const fs::path &path)
 
   Element printDirTable = tableDirs.Render();
   Element printFilesTable = tableFiles.Render();
+
+//---------------------------------------------------------------------
+//Add directory
+//---------------------------------------------------------------------
+std::vector<std::string> input_entries;
+auto input_option = InputOption();
+  std::string input_add_content;
+  bool enterInputDir = false;
+  input_option.on_enter = [&] {
+  input_entries.push_back(input_add_content);
+    input_add_content = "";
+    enterInputDir = true;
+  };
+  Component inputAdd = Input(&input_add_content, "input directory", input_option);
+
+//---------------------------------------------------------------------
+//Remove directory
+//---------------------------------------------------------------------
+std::vector<std::string> dirNames; 
+int dirSelected = 0;
+auto menu_option = MenuOption();
+refreshDir(dirNames, path);
+menu_option.on_enter = [&] {
+    std::stringstream rmStream(*(dirNames.begin()+dirSelected));
+    //listener->removeDirectory(rmStream); ->  controller->removeDirectory() TODO:
+    refreshDir(dirNames, path);
+};
+Component inputRemove = Menu(&dirNames, &dirSelected, menu_option);
+
+//---------------------------------------------------------------------
+// Set int-val
+//---------------------------------------------------------------------
+unsigned int interval = 5000;
+std::stringstream setInterval(std::to_string(interval));
+ 
+  // The tree of components. This defines how to navigate using the keyboard.
+  auto IntervalButtons = Container::Horizontal({
+      Button("Decrease", [&] { interval > 0 ? interval-=1000 : interval = 0;}, ButtonOption::Animated(Color::Red)),
+      Button("Reset", [&] { interval = 5000; }), 
+      Button("Increase", [&] { interval < 60000 ? interval+=1000 : interval = 60000; }, ButtonOption::Animated(Color::Green)),
+      Button("Set", [&] { /* TODO: listener->setIntervalTime(setInterval); */}) | flex ,
+  });
+
+//---------------------------------------------------------------------
+// Generate components to render
+//---------------------------------------------------------------------
+    Component container = Container::Horizontal({
+      buttons,
+      //input_first_name,
+      inputAdd,
+      inputRemove,
+      IntervalButtons,
+    //   layoutRemoveFile,
+    //   gauge_component,
+    });
+
+//---------------------------------------------------------------------
+// Renderer added and removed dirs in print tables
+//---------------------------------------------------------------------
+     auto render_command = [&] {
+    Elements line;
+    // Input
+    for (auto& it : input_entries) {
+      line.push_back(text(" " + it) | color(Color::RedLight));
+      //Add directory 
+       std::stringstream InputDirName(input_entries.back());
+       if(enterInputDir){
+           enterInputDir = false;
+           //listener->addDirectory(InputDirName);
+           refreshDir(dirNames, path);
+       }
+        tableDirs = printDir(path); //listener->printDirectory(); -> ->  TODO:  controller->addDirectory()
+        generateColorTable(&tableDirs);
+        printDirTable = tableDirs.Render();
+    }
+    
+    return line;
+  };
 //---------------------------------------------------------------------
 // Render screen
 //---------------------------------------------------------------------
@@ -179,14 +249,14 @@ void ViewFTXuserInterface::run(const fs::path &path)
                logoGraph,
                showTableDir ?  printDirTable | hcenter : emptyElement(),
                showTableFile ? printFilesTable | hcenter : emptyElement(),
-            //    showAddDir ?
-            //    vbox({ 
-            //    separator(),
-            //    hbox(text(" Input directory name: "), inputAdd->Render()),
-            //    hflow(render_command()) | flex_grow,
-            //    }) : emptyElement(),
-            //    showRemoveDir ?  inputRemove->Render() | vscroll_indicator | frame |   size(HEIGHT, EQUAL, 3) | flex : emptyElement(),
-            //    showSetIntVal ?  vbox({ text("Interval time value [milliseconds]: " + std::to_string(interval)), separator(), gauge(interval * 0.0000165f), separator(), IntervalButtons->Render(), }) | hcenter : emptyElement(),
+               showAddDir ?
+                vbox({ 
+                separator(),
+                hbox(text(" Input directory name: "), inputAdd->Render()),
+                hflow(render_command()) | flex_grow,
+                }) : emptyElement(),
+                showRemoveDir ?  inputRemove->Render() | vscroll_indicator | frame |   size(HEIGHT, EQUAL, 3) | flex : emptyElement(),
+                showSetIntVal ?  vbox({ text("Interval time value [milliseconds]: " + std::to_string(interval)), separator(), gauge((float)interval * 0.0000165f), separator(), IntervalButtons->Render(), }) | hcenter : emptyElement(),
             //    showRemoveFile ? layoutRemoveFile->Render() : emptyElement(),
             //    showStartSync ?  gauge_component->Render() : emptyElement(),
               // showStopSync ?  refresh_ui_continue = false :  emptyElement(),
