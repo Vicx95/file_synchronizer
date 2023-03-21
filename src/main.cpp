@@ -6,6 +6,8 @@
 #include "..//inc/serializer.hpp"
 #include "..//inc/timer.hpp"
 #include "..//inc/view.hpp"
+#include "..//inc/view_ftx.hpp"
+
 
 int main()
 {

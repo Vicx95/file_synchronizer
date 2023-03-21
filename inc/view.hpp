@@ -15,6 +15,8 @@
 #include "ftxui/component/component.hpp" // for Button, Horizontal, Renderer
 #include <ftxui/dom/table.hpp>           // for Table, TableSelection
 
+#include "model.hpp"
+
 namespace fs = std::filesystem;
 
 class View

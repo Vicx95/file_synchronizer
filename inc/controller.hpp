@@ -62,7 +62,7 @@ private:
     void removeFile();
     void printDirectory();
     void printFiles();
-    void setIntervalTime() override;
+    void setIntervalTime();
     void startSync();
     void stopSync();
     void forceSync();

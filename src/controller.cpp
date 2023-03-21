@@ -3,6 +3,7 @@
 #include "..//inc/model.hpp"
 #include "..//inc/thread_pool_provider.hpp"
 #include "..//inc/view.hpp"
+#include "..//inc/view_ftx.hpp"
 
 Controller::Controller()
     : Controller(std::make_unique<ViewFTXuserInterface>(), std::make_unique<Model>())
