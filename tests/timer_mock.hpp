@@ -1,3 +1,5 @@
+#pragma once
+
 #include "..//inc/timer.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 

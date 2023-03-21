@@ -18,7 +18,15 @@ enum class ErrorCode
     FAIL = 1
 };
 
-class Model
+class i_Model
+{
+public:
+    virtual ~i_Model() = default;
+
+    virtual void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval) = 0;
+};
+
+class Model : public i_Model
 {
 public:
     Model();
@@ -36,7 +44,7 @@ public:
     void createMainDir();
 
     void setIntervalTime(const std::string &strInterval);
-    void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval);
+    void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval) override;
     void startSync();
     void stopSync();
     void forceSync();

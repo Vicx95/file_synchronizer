@@ -1,3 +1,5 @@
+#pragma once
+
 #include "..//inc/scanner.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 
