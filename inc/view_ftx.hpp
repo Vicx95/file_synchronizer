@@ -14,12 +14,13 @@ public:
     void generateColorTable(ftxui::Table *table);
     ftxui::Element printLogoGraph();
     std::string get_permission_string(fs::perms permission);
-    void setModel(i_Model *ptr);
+    void setModel(i_Model *ptr) override;
 
     std::vector<std::vector<std::string>> printDir(const fs::path &path);
     std::vector<std::vector<std::string>> printAllFiles(const fs::path &path);
 
-    i_Model *model;
+private:
+    i_Model *m_model = nullptr;
 
     /*
             void printDirectory();

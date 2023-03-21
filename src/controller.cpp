@@ -5,7 +5,7 @@
 #include "..//inc/view.hpp"
 
 Controller::Controller()
-    : Controller(std::make_unique<ViewConsoleUserInterface>(), std::make_unique<Model>())
+    : Controller(std::make_unique<ViewFTXuserInterface>(), std::make_unique<Model>())
 {
 }
 
@@ -17,8 +17,9 @@ Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model)
 
 void Controller::run()
 {
-    //if(typeid(m_view) == typeid(ViewFTXuserInterface))
+    // if(typeid(m_view) == typeid(ViewFTXuserInterface))
     m_view->run(m_model->getMainDirectoryPath());
+    m_view->setModel(m_model.get());
     /*
     while (!m_isExitRequested)
     {
@@ -129,13 +130,13 @@ void Controller::printFiles()
 
     if (auto input = getKeyboardInput(); input.has_value())
     {
-        if (input.value() == "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath(),fileList))
+        if (input.value() == "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath(), fileList))
         {
             m_view->printMessage(View::Message::FolderEmpty);
             waitForButton();
         }
 
-        if(input.value() != "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath() / input.value(),fileList))
+        if (input.value() != "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath() / input.value(), fileList))
         {
             m_view->printMessage(View::Message::FolderEmpty);
             waitForButton();
