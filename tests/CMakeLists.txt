@@ -28,9 +28,6 @@ target_link_libraries(${PROJECT_NAME}-ut
     PRIVATE 
         gtest_main
         gmock
-        ftxui::screen 
-        ftxui::dom 
-        ftxui::component
         ${PROJECT_NAME}-lib
         )
 
