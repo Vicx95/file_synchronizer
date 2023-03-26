@@ -10,10 +10,6 @@
 #include <set>
 #include <string>
 
-#include <condition_variable>
-
-#include "ftxui/component/component.hpp" // for Button, Horizontal, Renderer
-#include <ftxui/dom/table.hpp>           // for Table, TableSelection
 
 #include "model.hpp"
 
@@ -22,8 +18,8 @@ namespace fs = std::filesystem;
 class View
 {
 public:
-    View() = default;
-    ~View() = default;
+  //  View() = default;
+    virtual ~View() {}
 
     enum class Message
     {
@@ -38,7 +34,7 @@ public:
     };
 
     virtual void run(const fs::path &path) = 0;
-    virtual void setModel(i_Model *ptr) = 0;
+    virtual void setModel(i_Model *ptr) = 0; 
     void printMenu();
     void printOptions();
     void printDirectory(const fs::path &path);

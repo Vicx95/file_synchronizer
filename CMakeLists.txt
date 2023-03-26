@@ -36,6 +36,7 @@ set(SOURCES
     src/main.cpp
     src/model.cpp
     src/view.cpp
+    src/view_ftx.cpp
     src/timer.cpp
     src/file_synchronizer.cpp
     src/scanner.cpp

@@ -4,12 +4,12 @@
 #include "..//inc/thread_pool_provider.hpp"
 #include "..//inc/view.hpp"
 #include "..//inc/view_ftx.hpp"
-
+/*
 Controller::Controller()
     : Controller(std::make_unique<ViewFTXuserInterface>(), std::make_unique<Model>())
 {
 }
-
+*/
 Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model) noexcept
     : m_view(std::move(view)), m_model(std::move(model))
 {
@@ -19,8 +19,9 @@ Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model)
 void Controller::run()
 {
     // if(typeid(m_view) == typeid(ViewFTXuserInterface))
-    m_view->run(m_model->getMainDirectoryPath());
     m_view->setModel(m_model.get());
+    m_view->run(m_model->getMainDirectoryPath());
+    
     /*
     while (!m_isExitRequested)
     {
@@ -116,7 +117,7 @@ void Controller::removeFile()
 {
     m_view->printMessage(View::Message::RemoveFile);
 
-    this->process(&Model::removeFile);
+    //this->process(&Model::removeFile);
 }
 void Controller::printDirectory()
 {

@@ -1,3 +1,18 @@
+#include "..//inc/view.hpp"
+#include "..//inc/view_ftx.hpp"
+
+#include <sstream>
+
+#include <ftxui/dom/table.hpp>      // for Table, TableSelection
+
+#include "ftxui/component/captured_mouse.hpp"     // for ftxui
+#include "ftxui/component/component_base.hpp"     // for ComponentBase
+#include "ftxui/component/screen_interactive.hpp" // for ScreenInteractive
+#include "ftxui/dom/elements.hpp"                 // for separator, gauge, text, Element, operator|, vbox, border
+using namespace ftxui;
+using namespace std::chrono_literals;
+namespace fs = std::filesystem;
+
 void ViewFTXuserInterface::setModel(i_Model *ptr)
 {
     if (ptr)
@@ -68,11 +83,68 @@ void ViewFTXuserInterface::run(const fs::path &path)
     refreshDir(dirNames, path);
     menu_option.on_enter = [&] {
         std::stringstream rmStream(*(dirNames.begin() + dirSelected));
-        // listener->removeDirectory(rmStream); ->  controller->removeDirectory() TODO:
+        m_model->removeDirectory(rmStream.str()); // listener->removeDirectory(rmStream); ->  controller->removeDirectory() TODO:
         refreshDir(dirNames, path);
     };
     Component inputRemove = Menu(&dirNames, &dirSelected, menu_option);
 
+    //---------------------------------------------------------------------
+    //Remove file
+    //---------------------------------------------------------------------
+    std::vector<std::string> dirsX;
+    std::vector<std::vector<std::string>> filesX;
+    std::deque<bool> dirMenuShow;
+
+    for (auto dir : fs::directory_iterator(path)){
+        if (!dir.is_regular_file()){
+            dirsX.push_back(dir.path().filename());
+            dirMenuShow.push_back(false);
+        }
+    }
+    std::sort(dirsX.begin(), dirsX.end());
+
+    for(auto dir : dirsX){
+        std::vector<std::string> filesInDir;
+        for (auto const &fileEntry : fs::recursive_directory_iterator(path / dir)){
+            if (fileEntry.is_regular_file()){
+                filesInDir.push_back((fileEntry.path().filename()));
+            }
+        }
+        std::sort(filesInDir.begin(), filesInDir.end());
+        filesX.push_back(filesInDir);
+    }
+    
+    auto checkAndMenuboxes = Container::Vertical({});
+    auto removefileMenuOption = MenuOption();
+    std::vector<int>::size_type it = 0;
+    int selectedMenuFile = 0;
+
+        for(auto dir : dirsX)
+        {
+            checkAndMenuboxes->Add(
+                Checkbox(dir, &dirMenuShow[it])
+            );
+
+            auto current_it = it;
+            removefileMenuOption.on_enter = [&, current_it] {
+                if (filesX[current_it].size() > (std::vector<std::string>::size_type)selectedMenuFile) {  // check if selected file exists
+                    auto it_file = filesX[current_it].begin() + selectedMenuFile;
+                    std::stringstream rmStream(*it_file);  // create stream for file name
+                    //listener->removeFile(rmStream);
+                    m_model->removeFile(rmStream);
+                    refreshFile(dirsX, filesX, path);
+                }
+            };
+
+            checkAndMenuboxes->Add(
+                Menu(&filesX[it], &selectedMenuFile, removefileMenuOption) | border | Maybe(&dirMenuShow[it])
+            );
+        it++;
+        }
+    
+    auto layoutRemoveFile = Container::Vertical({
+        checkAndMenuboxes,
+    });
     //---------------------------------------------------------------------
     // Set int-val
     //---------------------------------------------------------------------
@@ -94,11 +166,10 @@ void ViewFTXuserInterface::run(const fs::path &path)
     //---------------------------------------------------------------------
     Component container = Container::Horizontal({
         buttons,
-        // input_first_name,
         inputAdd,
         inputRemove,
         IntervalButtons,
-        //   layoutRemoveFile,
+        layoutRemoveFile,
         //   gauge_component,
     });
 
@@ -116,7 +187,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
             if (enterInputDir)
             {
                 enterInputDir = false;
-                // listener->addDirectory(InputDirName);
+                m_model->addDirectory(input_entries.back()); //listener->addDirectory(InputDirName);
                 refreshDir(dirNames, path);
             }
             tableDirs = printDir(path); // listener->printDirectory(); -> ->  TODO:  controller->addDirectory()
@@ -156,7 +227,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
                                        IntervalButtons->Render(),
                                    }) | hcenter
                                  : emptyElement(),
-                   //    showRemoveFile ? layoutRemoveFile->Render() : emptyElement(),
+                       showRemoveFile ? layoutRemoveFile->Render() : emptyElement(),
                    //    showStartSync ?  gauge_component->Render() : emptyElement(),
                    // showStopSync ?  refresh_ui_continue = false :  emptyElement(),
 
@@ -190,7 +261,8 @@ ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showBut
                                               cv.notify_one();
                                               // shift = 0;
                                           }),
-                                          Button("Force sync-up", [&] {}), Button("Read config", [&] {}), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
+                                          Button("Force sync-up", [&] {m_model->forceSync();}), 
+                                          Button("Read config", [&] {}), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
 
     });
 
@@ -215,6 +287,20 @@ void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames, const 
         dirNames.push_back(entry.path().filename().string());
     }
     std::sort(dirNames.begin(), dirNames.end());
+}
+
+void ViewFTXuserInterface::refreshFile(std::vector<std::string> &dirNames, std::vector<std::vector<std::string>> &filesNames, const fs::path &path){
+    filesNames.clear();
+    for(auto dir : dirNames){
+    std::vector<std::string> filesInDir;
+    for (auto const &fileEntry : fs::recursive_directory_iterator(path / dir)){
+        if (fileEntry.is_regular_file()){
+            filesInDir.push_back((fileEntry.path().filename()));
+        }
+    }
+    std::sort(filesInDir.begin(), filesInDir.end());
+    filesNames.push_back(filesInDir);
+    }
 }
 
 std::vector<std::vector<std::string>> ViewFTXuserInterface::printDir(const fs::path &path)

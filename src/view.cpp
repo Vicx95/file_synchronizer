@@ -1,15 +1,5 @@
 #include "..//inc/view.hpp"
 #include "..//inc/view_console.hpp"
-#include "..//inc/view_ftx.hpp"
-
-#include <sstream>
-
-#include "ftxui/component/captured_mouse.hpp"     // for ftxui
-#include "ftxui/component/component_base.hpp"     // for ComponentBase
-#include "ftxui/component/screen_interactive.hpp" // for ScreenInteractive
-#include "ftxui/dom/elements.hpp"                 // for separator, gauge, text, Element, operator|, vbox, border
-using namespace ftxui;
-using namespace std::chrono_literals;
 
 void View::printMenu()
 {
@@ -108,11 +98,11 @@ void View::printFiles(const std::set<fs::path> &fileDirList)
         }
     }
 }
-
+/*
 void ViewConsoleUserInterface::run(const fs::path &path)
 {
     fs::path spath = path;
     printMenu();
     printOptions();
 }
-
+*/ 

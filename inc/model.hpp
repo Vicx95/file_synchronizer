@@ -24,6 +24,12 @@ public:
     virtual ~i_Model() = default;
 
     virtual void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval) = 0;
+    virtual ErrorCode addDirectory(const std::string &dirName) = 0;
+    virtual ErrorCode removeDirectory(const std::string &dirName) = 0;
+    virtual ErrorCode removeFile(std::istream &std_input) = 0;
+    virtual void stopSync() = 0;
+    virtual void forceSync() = 0;
+
 };
 
 class Model : public i_Model
@@ -37,17 +43,17 @@ public:
 
     virtual ~Model() = default;
 
-    ErrorCode addDirectory(const std::string &dirName);
-    ErrorCode removeDirectory(const std::string &dirName);
-    ErrorCode removeFile(const std::string &dirName);
+    ErrorCode addDirectory(const std::string &dirName) override;
+    ErrorCode removeDirectory(const std::string &dirName) override;
+    ErrorCode removeFile(std::istream &std_input) override;
     ErrorCode getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList);
     void createMainDir();
 
     void setIntervalTime(const std::string &strInterval);
     void setIntervalTime(std::chrono::duration<int64_t, std::milli> interval) override;
     void startSync();
-    void stopSync();
-    void forceSync();
+    void stopSync() override;
+    void forceSync() override;
     void readConfig();
     void saveConfig();
     fs::path getMainDirectoryPath();
