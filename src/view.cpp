@@ -1,5 +1,5 @@
-#include "..//inc/view.hpp"
-#include "..//inc/view_console.hpp"
+#include "inc/view.hpp"
+#include "inc/view_console.hpp"
 
 void View::printMenu()
 {
@@ -105,4 +105,4 @@ void ViewConsoleUserInterface::run(const fs::path &path)
     printMenu();
     printOptions();
 }
-*/ 
+*/

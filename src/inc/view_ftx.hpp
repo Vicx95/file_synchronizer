@@ -4,16 +4,24 @@
 #include "view.hpp"
 
 #include <condition_variable>
+#include <sstream>
 
-#include "ftxui/component/component.hpp" // for Button, Horizontal, Renderer
-#include <ftxui/dom/table.hpp>           // for Table, TableSelection
+#include <ftxui/component/captured_mouse.hpp>     // for ftxui
+#include <ftxui/component/component.hpp>          // for Button, Horizontal, Renderer
+#include <ftxui/component/component_base.hpp>     // for ComponentBase
+#include <ftxui/component/screen_interactive.hpp> // for ScreenInteractive
+#include <ftxui/dom/elements.hpp>                 // for separator, gauge, text, Element, operator|, vbox, border
+#include <ftxui/dom/table.hpp>                    // for Table, TableSelection
+
+using namespace ftxui;
+using namespace std::chrono_literals;
+namespace fs = std::filesystem;
 
 class ViewFTXuserInterface : public View
 {
 public:
     void run(const fs::path &path) override;
-    void setModel(i_Model *ptr) override; 
-
+    void setModel(i_Model *ptr) override;
 
     ftxui::Component createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, std::vector<std::string> &dirNamesX, ftxui::ScreenInteractive &screen, const fs::path &path);
     void hideMenuButtons(std::deque<bool *> &showButtons);

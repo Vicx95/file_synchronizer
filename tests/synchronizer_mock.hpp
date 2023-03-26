@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..//inc/file_synchronizer.hpp"
+#include "file_synchronizer.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 
 class MockSynchronizer : public i_FileSynchronizer

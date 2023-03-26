@@ -1,4 +1,4 @@
-#include "..//inc/model.hpp"
+#include "..//src/inc/model.hpp"
 #include "scanner_mock.hpp"
 #include "serializer_mock.hpp"
 #include "synchronizer_mock.hpp"

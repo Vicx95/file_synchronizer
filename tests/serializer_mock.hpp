@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..//inc/serializer.hpp"
+#include "serializer.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 
 class MockSerializer : public i_Serializer

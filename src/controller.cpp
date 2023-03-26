@@ -1,9 +1,9 @@
-#include "..//inc/controller.hpp"
-#include "..//inc/logger.hpp"
-#include "..//inc/model.hpp"
-#include "..//inc/thread_pool_provider.hpp"
-#include "..//inc/view.hpp"
-#include "..//inc/view_ftx.hpp"
+#include "inc/controller.hpp"
+#include "inc/logger.hpp"
+#include "inc/model.hpp"
+#include "inc/thread_pool_provider.hpp"
+#include "inc/view.hpp"
+#include "inc/view_ftx.hpp"
 /*
 Controller::Controller()
     : Controller(std::make_unique<ViewFTXuserInterface>(), std::make_unique<Model>())
@@ -21,7 +21,7 @@ void Controller::run()
     // if(typeid(m_view) == typeid(ViewFTXuserInterface))
     m_view->setModel(m_model.get());
     m_view->run(m_model->getMainDirectoryPath());
-    
+
     /*
     while (!m_isExitRequested)
     {
@@ -117,7 +117,7 @@ void Controller::removeFile()
 {
     m_view->printMessage(View::Message::RemoveFile);
 
-    //this->process(&Model::removeFile);
+    // this->process(&Model::removeFile);
 }
 void Controller::printDirectory()
 {

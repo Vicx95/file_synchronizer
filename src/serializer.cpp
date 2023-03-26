@@ -1,4 +1,4 @@
-#include "..//inc/serializer.hpp"
+#include "inc/serializer.hpp"
 
 void SerializerToJSON::serialize()
 {

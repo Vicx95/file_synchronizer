@@ -1,9 +1,9 @@
-#include "..//inc/model.hpp"
-#include "..//inc/file_synchronizer.hpp"
-#include "..//inc/scanner.hpp"
-#include "..//inc/serializer.hpp"
-#include "..//inc/thread_pool_provider.hpp"
-#include "..//inc/timer.hpp"
+#include "inc/model.hpp"
+#include "inc/file_synchronizer.hpp"
+#include "inc/scanner.hpp"
+#include "inc/serializer.hpp"
+#include "inc/thread_pool_provider.hpp"
+#include "inc/timer.hpp"
 
 namespace fs = std::filesystem;
 
@@ -81,13 +81,16 @@ ErrorCode Model::removeDirectory(const std::string &dirName)
 ErrorCode Model::removeFile(std::istream &std_input)
 {
     std::set<std::string> fileNames;
-    for (auto const &fileEntry : fs::recursive_directory_iterator(m_mainDirectoryPath)){
-        if (fileEntry.is_regular_file()){
+    for (auto const &fileEntry : fs::recursive_directory_iterator(m_mainDirectoryPath))
+    {
+        if (fileEntry.is_regular_file())
+        {
             fileNames.insert(fileEntry.path().filename());
         }
     }
     std::cout << "List of all files: \n";
-    for(auto const &file : fileNames){
+    for (auto const &file : fileNames)
+    {
         std::cout << file << "\n";
     }
 
@@ -95,16 +98,19 @@ ErrorCode Model::removeFile(std::istream &std_input)
     std::string file;
     std::cin.clear();
     std_input >> file;
-    for (auto dir : fs::directory_iterator(m_mainDirectoryPath)){
-       // std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto dir : fs::directory_iterator(m_mainDirectoryPath))
+    {
+        // std::lock_guard<std::mutex> lock(m_mutex);
         try
         {
-            if(fs::exists(dir.path() / file)){
+            if (fs::exists(dir.path() / file))
+            {
                 fs::remove(dir.path() / file);
-                std::cout << "Removed file in directory:" << dir.path().filename() <<  "\n";
+                std::cout << "Removed file in directory:" << dir.path().filename() << "\n";
             }
-            else{
-                std::cout << "Not exist file in directory:" << dir.path().filename() <<  "\n";
+            else
+            {
+                std::cout << "Not exist file in directory:" << dir.path().filename() << "\n";
             }
         }
         catch (std::exception &e)
