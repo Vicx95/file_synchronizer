@@ -23,7 +23,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
     bool showStopSync = false;
     std::deque<bool *> showButtons{&showAddDir, &showRemoveDir, &showRemoveFile, &showTableDir, &showTableFile, &showSetIntVal, &showStartSync, &showStopSync};
     std::vector<std::string> dirNamesX;
-    // unsigned int shift = 0;
+    unsigned int shift = 0;
     std::condition_variable cv;
     std::mutex cv_mutex;
     std::atomic<bool> refresh_ui_continue = true;
@@ -154,6 +154,37 @@ void ViewFTXuserInterface::run(const fs::path &path)
     });
 
     //---------------------------------------------------------------------
+    // Start sync
+    //---------------------------------------------------------------------
+    auto render_gauge = [&shift, &interval](unsigned int delta) {
+        float progress = (float)((shift + delta) % (interval/1000)) / (float)(interval/1000); 
+        delta = 0;
+        return hbox({
+            text("Synchronization: "),
+
+            text(std::to_string(int(progress * 100)) + "% ") |
+                size(WIDTH, EQUAL, 5),
+            gauge(progress),
+        });
+    };
+
+    auto render_gauge2 = [&shift, &interval](unsigned int delta) {
+        float progress = (float)((shift + delta) % (interval/1000)) / (float)(interval/1000);
+        return hbox({
+            text("Time interval:   "),
+            text(std::to_string(int(progress * (float)(interval / 1000))) + "s ") |
+                size(WIDTH, EQUAL, 5),
+            gauge(progress),
+        });
+    };
+
+    auto gauge_component = Renderer([render_gauge, render_gauge2] {
+        return vbox({
+            render_gauge(0) | color(Color::MagentaLight),
+            render_gauge2(0) | color(Color::YellowLight),
+    });
+    });
+    //---------------------------------------------------------------------
     // Generate components to render
     //---------------------------------------------------------------------
     Component container = Container::Horizontal({
@@ -162,7 +193,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
         inputRemove,
         IntervalButtons,
         layoutRemoveFile,
-        //   gauge_component,
+        gauge_component,
     });
 
     //---------------------------------------------------------------------
@@ -186,7 +217,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
             generateColorTable(&tableDirs);
             printDirTable = tableDirs.Render();
         }
-
+ 
         return line;
     };
     //---------------------------------------------------------------------
@@ -220,12 +251,14 @@ void ViewFTXuserInterface::run(const fs::path &path)
                                    }) | hcenter
                                  : emptyElement(),
                    showRemoveFile ? layoutRemoveFile->Render() : emptyElement(),
-                   //    showStartSync ?  gauge_component->Render() : emptyElement(),
+                    showStartSync ?  gauge_component->Render() : emptyElement(),
                    // showStopSync ?  refresh_ui_continue = false :  emptyElement(),
 
                }) |
                border;
     });
+
+    std::jthread refresh_ui(&ViewFTXuserInterface::synchronizationFTX, this, std::ref(cv_mutex), std::ref(cv), std::ref(screen), std::ref(shift), std::ref(interval), std::ref(refresh_ui_continue));
 
     screen.Loop(component);
 }
@@ -386,6 +419,27 @@ ftxui::Element ViewFTXuserInterface::printLogoGraph()
     return document;
 }
 
+void ViewFTXuserInterface::synchronizationFTX(std::mutex& cv_mutex, std::condition_variable& cv, ftxui::ScreenInteractive& screen, unsigned int& shift, unsigned int& interval, std::atomic<bool>& refresh_ui_continue)
+{
+    while (true) {
+        std::unique_lock<std::mutex> lock(cv_mutex);
+        if(shift % (interval/1000) == 0){
+            m_model->forceSync();
+            shift = 1;
+        }
+        cv.wait(lock, [&] { return refresh_ui_continue.load(); });
+        if (!refresh_ui_continue.load()) {
+            // Exit the loop if refresh_ui_continue is false
+            break;
+        }
+        std::this_thread::sleep_for(1s);
+        screen.Post([&] { shift++; });
+
+        screen.Post(Event::Custom);
+        lock.unlock();
+    }
+}
+
 std::string ViewFTXuserInterface::get_permission_string(fs::perms permission)
 {
     std::stringstream ss;
@@ -399,4 +453,9 @@ std::string ViewFTXuserInterface::get_permission_string(fs::perms permission)
     ss << ((permission & fs::perms::others_write) != fs::perms::none ? "w" : "-");
     ss << ((permission & fs::perms::others_exec) != fs::perms::none ? "x" : "-");
     return ss.str();
+}
+
+std::string ViewFTXuserInterface::getTypeUI()
+{
+    return "FTX";
 }

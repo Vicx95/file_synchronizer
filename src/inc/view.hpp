@@ -35,6 +35,7 @@ public:
 
     virtual void run(const fs::path &path) = 0;
     virtual void setModel(i_Model *ptr) = 0; 
+    virtual std::string getTypeUI() = 0;
     void printMenu();
     void printOptions();
     void printDirectory(const fs::path &path);

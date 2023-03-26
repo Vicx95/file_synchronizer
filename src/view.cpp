@@ -22,6 +22,7 @@ void View::printOptions()
               << "11. Save config  \n";
 }
 
+
 void View::printDirectory(const fs::path &path)
 {
     fs::current_path(path);

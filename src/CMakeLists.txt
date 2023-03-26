@@ -4,6 +4,7 @@ set(SOURCES
     model.cpp
     view.cpp
     view_ftx.cpp
+    view_console.cpp
     timer.cpp
     file_synchronizer.cpp
     scanner.cpp

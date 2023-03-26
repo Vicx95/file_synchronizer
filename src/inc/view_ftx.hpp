@@ -22,6 +22,7 @@ class ViewFTXuserInterface : public View
 public:
     void run(const fs::path &path) override;
     void setModel(i_Model *ptr) override;
+    std::string getTypeUI() override; 
 
     ftxui::Component createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, std::vector<std::string> &dirNamesX, ftxui::ScreenInteractive &screen, const fs::path &path);
     void hideMenuButtons(std::deque<bool *> &showButtons);
@@ -31,6 +32,7 @@ public:
     void generateColorTable(ftxui::Table *table);
     ftxui::Element printLogoGraph();
     std::string get_permission_string(fs::perms permission);
+    void synchronizationFTX(std::mutex& cv_mutex, std::condition_variable& cv, ftxui::ScreenInteractive& screen, unsigned int& shift, unsigned int& interval, std::atomic<bool>& refresh_ui_continue);
 
     std::vector<std::vector<std::string>> printDir(const fs::path &path);
     std::vector<std::vector<std::string>> printAllFiles(const fs::path &path);
