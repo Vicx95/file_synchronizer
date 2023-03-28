@@ -21,7 +21,8 @@ void ViewFTXuserInterface::run(const fs::path &path)
     bool showSetIntVal = false;
     bool showStartSync = false;
     bool showStopSync = false;
-    std::deque<bool *> showButtons{&showAddDir, &showRemoveDir, &showRemoveFile, &showTableDir, &showTableFile, &showSetIntVal, &showStartSync, &showStopSync};
+    bool showReadConfig = false;
+    std::deque<bool *> showButtons{&showAddDir, &showRemoveDir, &showRemoveFile, &showTableDir, &showTableFile, &showSetIntVal, &showStartSync, &showStopSync, &showReadConfig};
     std::vector<std::string> dirNamesX;
     unsigned int shift = 0;
     std::condition_variable cv;
@@ -185,6 +186,160 @@ void ViewFTXuserInterface::run(const fs::path &path)
     });
     });
     //---------------------------------------------------------------------
+    // Read config
+    //---------------------------------------------------------------------
+ 
+  int compiler_selected = 0;
+  Component compiler = Radiobox(&dirsX, &compiler_selected);
+ /*
+  std::array<std::string, 8> options_label = {
+      "-Wall",
+      "-Werror",
+      "-lpthread",
+      "-O3",
+      "-Wabi-tag",
+      "-Wno-class-conversion",
+      "-Wcomma-subscript",
+      "-Wno-conversion-null",
+  };
+  std::array<bool, 8> options_state = {
+      false, false, false, false, false, false, false, false,
+  };
+ */
+
+    fs::path tmpDir = "/home/file_synchronizer/tmpConfig";
+    std::deque<bool> filesOptionsState;
+    std::vector<std::string> filesOptionsLabel;
+
+        for (auto const &fileEntry : fs::recursive_directory_iterator(tmpDir))
+        {
+            if (fileEntry.is_regular_file())
+            {
+                filesOptionsState.push_back(false);
+                filesOptionsLabel.push_back(fileEntry.path().filename());
+            }
+        }
+      //  std::sort(filesInDir.begin(), filesInDir.end());
+      //  filesX.push_back(filesInDir);
+
+
+
+  std::vector<std::string> input_entriesC;
+  int input_selectedC = 0;
+  Component inputC = Menu(&input_entriesC, &input_selectedC);
+ 
+  auto input_optionC = InputOption();
+  std::string input_add_contentC;
+  input_optionC.on_enter = [&] {
+    input_entriesC.push_back(input_add_contentC);
+    input_add_contentC = "";
+  };
+  Component input_addC = Input(&input_add_contentC, "input files", input_optionC);
+ 
+  std::string executable_content_ = "";
+  Component executable_ = Input(&executable_content_, "executable");
+ 
+
+  Component flags = Container::Vertical({});
+    std::sort(filesOptionsLabel.begin(), filesOptionsLabel.end());
+    int fileOptionsIter = 0;
+    for(auto file : filesOptionsLabel){
+        flags->Add(Checkbox(file, &filesOptionsState[fileOptionsIter]));
+        fileOptionsIter++;
+    }
+    
+  /*      
+  Component flags = Container::Vertical({
+      Checkbox(&options_label[0], &options_state[0]),
+      Checkbox(&options_label[1], &options_state[1]),
+      Checkbox(&options_label[2], &options_state[2]),
+      Checkbox(&options_label[3], &options_state[3]),
+      Checkbox(&options_label[4], &options_state[4]),
+      Checkbox(&options_label[5], &options_state[5]),
+      Checkbox(&options_label[6], &options_state[6]),
+      Checkbox(&options_label[7], &options_state[7]),
+  });
+  */
+ 
+  auto compiler_component = Container::Horizontal({
+      compiler,
+      flags,
+      Container::Vertical({
+          executable_,
+          Container::Horizontal({
+              input_addC,
+              inputC,
+          }),
+      }),
+  });
+ 
+  auto render_commandC = [&] {
+    Elements line;
+    // Compiler
+    line.push_back(text(dirsX[compiler_selected]) | bold);
+    // flags
+    for(size_t i = 0; i < filesOptionsLabel.size()-1; ++i){
+        if (filesOptionsState[i]) {
+            line.push_back(text(" "));
+            line.push_back(text(filesOptionsLabel[i]) | dim);
+        }
+    }
+    /*
+    for (int i = 0; i < 8; ++i) {
+      if (options_state[i]) {
+        line.push_back(text(" "));
+        line.push_back(text(options_label[i]) | dim);
+      }
+    }
+    */
+    // Executable
+    if (!executable_content_.empty()) {
+      line.push_back(text(" -o ") | bold);
+      line.push_back(text(executable_content_) | color(Color::BlueLight) |
+                     bold);
+    }
+    // Input
+    for (auto& it : input_entriesC) {
+      line.push_back(text(" " + it) | color(Color::RedLight));
+    }
+    return line;
+  };
+ 
+  auto compiler_renderer = Renderer(compiler_component, [&] {
+    auto compiler_win = window(text("Dirs/Machines"),
+                               compiler->Render() | vscroll_indicator | frame);
+    auto flags_win =
+        window(text("tmpFiles"), flags->Render() | vscroll_indicator | frame);
+    auto executable_win = window(text("Executable:"), executable_->Render());
+    auto input_win =
+        window(text("Input"), hbox({
+                                  vbox({
+                                      hbox({
+                                          text("Add: "),
+                                          input_addC->Render(),
+                                      }) | size(WIDTH, EQUAL, 20) |
+                                          size(HEIGHT, EQUAL, 1),
+                                      filler(),
+                                  }),
+                                  separator(),
+                                  inputC->Render() | vscroll_indicator | frame |
+                                      size(HEIGHT, EQUAL, 3) | flex,
+                              }));
+    return vbox({
+               hbox({
+                   compiler_win,
+                   flags_win,
+                   vbox({
+                       executable_win | size(WIDTH, EQUAL, 20),
+                       input_win | size(WIDTH, EQUAL, 60),
+                   }),
+                   filler(),
+               }) | size(HEIGHT, LESS_THAN, 8),
+               hflow(render_commandC()) | flex_grow,
+           }) |
+           flex_grow;
+  });
+    //---------------------------------------------------------------------
     // Generate components to render
     //---------------------------------------------------------------------
     Component container = Container::Horizontal({
@@ -194,6 +349,9 @@ void ViewFTXuserInterface::run(const fs::path &path)
         IntervalButtons,
         layoutRemoveFile,
         gauge_component,
+        compiler_renderer,
+    
+
     });
 
     //---------------------------------------------------------------------
@@ -253,6 +411,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
                    showRemoveFile ? layoutRemoveFile->Render() : emptyElement(),
                     showStartSync ?  gauge_component->Render() : emptyElement(),
                    // showStopSync ?  refresh_ui_continue = false :  emptyElement(),
+                   showReadConfig ? compiler_renderer->Render() : emptyElement(),
 
                }) |
                border;
@@ -286,7 +445,7 @@ ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showBut
                                               cv.notify_one();
                                               // shift = 0;
                                           }),
-                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {}), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
+                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {hideMenuButtons(showButtons); *showButtons[8] = true;}), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
 
     });
 
