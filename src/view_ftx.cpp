@@ -29,7 +29,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
     std::mutex cv_mutex;
     std::atomic<bool> refresh_ui_continue = true;
 
-    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, dirNamesX, screen, path);
+    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, screen);
 
     //----------------------------------------------------------------------
     // Print logo-graph
@@ -138,6 +138,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
     auto layoutRemoveFile = Container::Vertical({
         checkAndMenuboxes,
     });
+
     //---------------------------------------------------------------------
     // Set int-val
     //---------------------------------------------------------------------
@@ -191,26 +192,38 @@ void ViewFTXuserInterface::run(const fs::path &path)
  
   int compiler_selected = 0;
   Component compiler = Radiobox(&dirsX, &compiler_selected);
- /*
-  std::array<std::string, 8> options_label = {
-      "-Wall",
-      "-Werror",
-      "-lpthread",
-      "-O3",
-      "-Wabi-tag",
-      "-Wno-class-conversion",
-      "-Wcomma-subscript",
-      "-Wno-conversion-null",
-  };
-  std::array<bool, 8> options_state = {
-      false, false, false, false, false, false, false, false,
-  };
- */
-
-    fs::path tmpDir = "/home/file_synchronizer/tmpConfig";
+ 
+    
     std::deque<bool> filesOptionsState;
     std::vector<std::string> filesOptionsLabel;
+    fs::path tmpDir = ""; 
+  Component flags = Container::Vertical({});
 
+
+
+  std::vector<std::string> input_entriesC;
+  int input_selectedC = 0;
+  auto input_optionListC = MenuOption();
+  input_optionListC.on_enter = [&] {
+  std::string tmpUsedPath = input_entriesC[input_selectedC];
+  input_entriesC.clear();
+  input_entriesC.push_back(tmpUsedPath);
+  };
+  Component inputC = Menu(&input_entriesC, &input_selectedC, input_optionListC);
+ 
+  
+
+  auto input_optionC = InputOption();
+  std::string input_add_contentC;
+  input_optionC.on_enter = [&] {
+    input_entriesC.push_back(input_add_contentC);
+    input_add_contentC = "";
+
+    //flags
+    filesOptionsState.clear();
+    filesOptionsLabel.clear();
+    tmpDir = input_entriesC.back();
+    if (std::filesystem::exists(tmpDir)){
         for (auto const &fileEntry : fs::recursive_directory_iterator(tmpDir))
         {
             if (fileEntry.is_regular_file())
@@ -219,47 +232,37 @@ void ViewFTXuserInterface::run(const fs::path &path)
                 filesOptionsLabel.push_back(fileEntry.path().filename());
             }
         }
-      //  std::sort(filesInDir.begin(), filesInDir.end());
-      //  filesX.push_back(filesInDir);
-
-
-
-  std::vector<std::string> input_entriesC;
-  int input_selectedC = 0;
-  Component inputC = Menu(&input_entriesC, &input_selectedC);
- 
-  auto input_optionC = InputOption();
-  std::string input_add_contentC;
-  input_optionC.on_enter = [&] {
-    input_entriesC.push_back(input_add_contentC);
-    input_add_contentC = "";
-  };
-  Component input_addC = Input(&input_add_contentC, "input files", input_optionC);
- 
-  std::string executable_content_ = "";
-  Component executable_ = Input(&executable_content_, "executable");
- 
-
-  Component flags = Container::Vertical({});
+    }
     std::sort(filesOptionsLabel.begin(), filesOptionsLabel.end());
     int fileOptionsIter = 0;
+    flags->DetachAllChildren();
     for(auto file : filesOptionsLabel){
         flags->Add(Checkbox(file, &filesOptionsState[fileOptionsIter]));
         fileOptionsIter++;
     }
+  };
+  Component input_addC = Input(&input_add_contentC, "input path with tmpFiles", input_optionC);
+ 
+  //std::string executable_content_ = "";
+  //Component executable_ = Input(&executable_content_, "executable");
     
-  /*      
-  Component flags = Container::Vertical({
-      Checkbox(&options_label[0], &options_state[0]),
-      Checkbox(&options_label[1], &options_state[1]),
-      Checkbox(&options_label[2], &options_state[2]),
-      Checkbox(&options_label[3], &options_state[3]),
-      Checkbox(&options_label[4], &options_state[4]),
-      Checkbox(&options_label[5], &options_state[5]),
-      Checkbox(&options_label[6], &options_state[6]),
-      Checkbox(&options_label[7], &options_state[7]),
-  });
-  */
+    //auto action = [&] {  };
+ 
+    int valuexx = 0;
+    auto action = [&] { valuexx++; input_entriesC.push_back(std::to_string(valuexx)); 
+    
+    for(size_t i = 0; i < filesOptionsLabel.size(); ++i){
+        if (filesOptionsState[i]) {
+            std::filesystem::copy(tmpDir / filesOptionsLabel[i], path / dirsX[compiler_selected] / filesOptionsLabel[i], std::filesystem::copy_options::recursive);
+        }
+    }
+    
+    
+    };
+    //auto action_renderer = Renderer([&] { return text("count = " + std::to_string(valuexx)); });
+     auto executable_ = Button("Apply", action, ButtonOption::Animated(Color::DarkCyan));
+
+
  
   auto compiler_component = Container::Horizontal({
       compiler,
@@ -278,26 +281,22 @@ void ViewFTXuserInterface::run(const fs::path &path)
     // Compiler
     line.push_back(text(dirsX[compiler_selected]) | bold);
     // flags
-    for(size_t i = 0; i < filesOptionsLabel.size()-1; ++i){
+ 
+
+    for(size_t i = 0; i < filesOptionsLabel.size(); ++i){
         if (filesOptionsState[i]) {
             line.push_back(text(" "));
             line.push_back(text(filesOptionsLabel[i]) | dim);
         }
     }
-    /*
-    for (int i = 0; i < 8; ++i) {
-      if (options_state[i]) {
-        line.push_back(text(" "));
-        line.push_back(text(options_label[i]) | dim);
-      }
-    }
-    */
+
     // Executable
-    if (!executable_content_.empty()) {
-      line.push_back(text(" -o ") | bold);
-      line.push_back(text(executable_content_) | color(Color::BlueLight) |
-                     bold);
-    }
+    // if (!executable_content_.empty()) {
+    //   line.push_back(text(" -o ") | bold);
+    //   line.push_back(text(executable_content_) | color(Color::BlueLight) |
+    //                  bold);
+    // }
+
     // Input
     for (auto& it : input_entriesC) {
       line.push_back(text(" " + it) | color(Color::RedLight));
@@ -306,18 +305,21 @@ void ViewFTXuserInterface::run(const fs::path &path)
   };
  
   auto compiler_renderer = Renderer(compiler_component, [&] {
+    refreshDir(dirsX, path);
     auto compiler_win = window(text("Dirs/Machines"),
                                compiler->Render() | vscroll_indicator | frame);
     auto flags_win =
         window(text("tmpFiles"), flags->Render() | vscroll_indicator | frame);
-    auto executable_win = window(text("Executable:"), executable_->Render());
+    auto executable_win = window(text("Apply changes:"), executable_->Render());
+   // auto action_win = window(text("Executable:"), action_renderer->Render());
+
     auto input_win =
         window(text("Input"), hbox({
                                   vbox({
                                       hbox({
                                           text("Add: "),
                                           input_addC->Render(),
-                                      }) | size(WIDTH, EQUAL, 20) |
+                                      }) | size(WIDTH, EQUAL, 35) |
                                           size(HEIGHT, EQUAL, 1),
                                       filler(),
                                   }),
@@ -330,8 +332,9 @@ void ViewFTXuserInterface::run(const fs::path &path)
                    compiler_win,
                    flags_win,
                    vbox({
-                       executable_win | size(WIDTH, EQUAL, 20),
-                       input_win | size(WIDTH, EQUAL, 60),
+                       executable_win, // | size(WIDTH, EQUAL, 20),
+                      // action_win | size(WIDTH, EQUAL, 20),
+                       input_win | size(WIDTH, EQUAL, 70),
                    }),
                    filler(),
                }) | size(HEIGHT, LESS_THAN, 8),
@@ -422,12 +425,12 @@ void ViewFTXuserInterface::run(const fs::path &path)
     screen.Loop(component);
 }
 
-ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, std::vector<std::string> &dirNamesX, ftxui::ScreenInteractive &screen, const fs::path &path)
+ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen)
 {
     // The tree of components. This defines how to navigate using the keyboard.
     auto buttons = Container::Horizontal({Button("Add dir", [&] { hideMenuButtons(showButtons); *showButtons[0] = true; }),
                                           Button("Remove Dir", [&] { hideMenuButtons(showButtons); *showButtons[1] = true; }),
-                                          Button("Remove File", [&] { hideMenuButtons(showButtons); *showButtons[2] = true; refreshDir(dirNamesX, path); }),
+                                          Button("Remove File", [&] { hideMenuButtons(showButtons); *showButtons[2] = true; }),
                                           Button("Print Dirs", [&] { hideMenuButtons(showButtons); *showButtons[3] = true; }),
                                           Button("Print files", [&] { hideMenuButtons(showButtons); *showButtons[4] = true; }),
                                           Button("Set int-val", [&] { hideMenuButtons(showButtons); *showButtons[5] = true; }),
@@ -445,7 +448,7 @@ ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showBut
                                               cv.notify_one();
                                               // shift = 0;
                                           }),
-                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {hideMenuButtons(showButtons); *showButtons[8] = true;}), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
+                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {hideMenuButtons(showButtons); *showButtons[8] = true; }), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
 
     });
 
@@ -467,7 +470,11 @@ void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames, const 
     dirNames.clear();
     for (auto const &entry : fs::directory_iterator(path)) // directory_iterator
     {
-        dirNames.push_back(entry.path().filename().string());
+        if (!entry.is_regular_file())
+        {
+            dirNames.push_back(entry.path().filename().string());
+        }
+
     }
     std::sort(dirNames.begin(), dirNames.end());
 }
@@ -618,3 +625,10 @@ std::string ViewFTXuserInterface::getTypeUI()
 {
     return "FTX";
 }
+/*
+ViewFTXuserInterface::~ViewFTXuserInterface() {
+    if (refresh_ui.joinable()) {
+        refresh_ui.join();
+    }
+}
+*/
