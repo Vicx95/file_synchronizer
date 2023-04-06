@@ -20,12 +20,12 @@ namespace fs = std::filesystem;
 class ViewFTXuserInterface : public View
 {
 public:
-    virtual ~ViewFTXuserInterface() = default;
+    virtual ~ViewFTXuserInterface();
     void run(const fs::path &path) override;
     void setModel(i_Model *ptr) override;
     std::string getTypeUI() override; 
 
-    ftxui::Component createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen);
+    ftxui::Component createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen, bool &enterReadConfig);
     void hideMenuButtons(std::deque<bool *> &showButtons);
     void refreshDir(std::vector<std::string> &dirNames, const fs::path &path);
     void refreshFile(std::vector<std::string> &dirNames, std::vector<std::vector<std::string>> &filesNames, const fs::path &path);
@@ -40,7 +40,7 @@ public:
 
 private:
     i_Model *m_model = nullptr;
-
+    std::unique_ptr<i_Timer> m_FTXsyncTimer = std::make_unique<Timer>();
     /*
             void printDirectory();
             void printFiles();

@@ -28,8 +28,9 @@ void ViewFTXuserInterface::run(const fs::path &path)
     std::condition_variable cv;
     std::mutex cv_mutex;
     std::atomic<bool> refresh_ui_continue = true;
+    bool enterReadConfig = false;
 
-    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, screen);
+    auto buttons = createButtons(showButtons, cv, refresh_ui_continue, screen, enterReadConfig);
 
     //----------------------------------------------------------------------
     // Print logo-graph
@@ -110,6 +111,8 @@ void ViewFTXuserInterface::run(const fs::path &path)
 
     auto checkAndMenuboxes = Container::Vertical({});
     auto removefileMenuOption = MenuOption();
+    refreshDir(dirsX, path);
+
     std::vector<int>::size_type it = 0;
     int selectedMenuFile = 0;
 
@@ -197,9 +200,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
     std::deque<bool> filesOptionsState;
     std::vector<std::string> filesOptionsLabel;
     fs::path tmpDir = ""; 
-  Component flags = Container::Vertical({});
-
-
+    Component flags = Container::Vertical({});
 
   std::vector<std::string> input_entriesC;
   int input_selectedC = 0;
@@ -208,6 +209,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
   std::string tmpUsedPath = input_entriesC[input_selectedC];
   input_entriesC.clear();
   input_entriesC.push_back(tmpUsedPath);
+  refreshDir(dirsX, path);
   };
   Component inputC = Menu(&input_entriesC, &input_selectedC, input_optionListC);
  
@@ -305,7 +307,11 @@ void ViewFTXuserInterface::run(const fs::path &path)
   };
  
   auto compiler_renderer = Renderer(compiler_component, [&] {
-    refreshDir(dirsX, path);
+    if(enterReadConfig) 
+        {
+            refreshDir(dirsX, path);
+            enterReadConfig = false;
+        }
     auto compiler_win = window(text("Dirs/Machines"),
                                compiler->Render() | vscroll_indicator | frame);
     auto flags_win =
@@ -420,12 +426,16 @@ void ViewFTXuserInterface::run(const fs::path &path)
                border;
     });
 
-    std::jthread refresh_ui(&ViewFTXuserInterface::synchronizationFTX, this, std::ref(cv_mutex), std::ref(cv), std::ref(screen), std::ref(shift), std::ref(interval), std::ref(refresh_ui_continue));
+    //std::jthread refresh_ui(&ViewFTXuserInterface::synchronizationFTX, this, std::ref(cv_mutex), std::ref(cv), std::ref(screen), std::ref(shift), std::ref(interval), std::ref(refresh_ui_continue));
+    std::chrono::milliseconds intVal(1000);
+    m_FTXsyncTimer->start(intVal, [&]() {
+        this->synchronizationFTX(cv_mutex, cv, screen, shift, interval, refresh_ui_continue);
+    });
 
     screen.Loop(component);
 }
 
-ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen)
+ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen, bool &enterReadConfig)
 {
     // The tree of components. This defines how to navigate using the keyboard.
     auto buttons = Container::Horizontal({Button("Add dir", [&] { hideMenuButtons(showButtons); *showButtons[0] = true; }),
@@ -448,7 +458,7 @@ ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showBut
                                               cv.notify_one();
                                               // shift = 0;
                                           }),
-                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {hideMenuButtons(showButtons); *showButtons[8] = true; }), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
+                                          Button("Force sync-up", [&] { m_model->forceSync(); }), Button("Read config", [&] {hideMenuButtons(showButtons); enterReadConfig = true; *showButtons[8] = true; }), Button("Save config", [&] {}), Button("Exit", [&] { screen.Exit(); })
 
     });
 
@@ -465,8 +475,6 @@ void ViewFTXuserInterface::hideMenuButtons(std::deque<bool *> &showButtons)
 
 void ViewFTXuserInterface::refreshDir(std::vector<std::string> &dirNames, const fs::path &path)
 {
-    std::vector<std::string> vec = dirNames;
-
     dirNames.clear();
     for (auto const &entry : fs::directory_iterator(path)) // directory_iterator
     {
@@ -587,20 +595,14 @@ ftxui::Element ViewFTXuserInterface::printLogoGraph()
 
 void ViewFTXuserInterface::synchronizationFTX(std::mutex& cv_mutex, std::condition_variable& cv, ftxui::ScreenInteractive& screen, unsigned int& shift, unsigned int& interval, std::atomic<bool>& refresh_ui_continue)
 {
-    while (true) {
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        if(shift % (interval/1000) == 0){
-            m_model->forceSync();
-            shift = 1;
-        }
-        cv.wait(lock, [&] { return refresh_ui_continue.load(); });
-        if (!refresh_ui_continue.load()) {
-            // Exit the loop if refresh_ui_continue is false
-            break;
-        }
-        std::this_thread::sleep_for(1s);
+    std::unique_lock<std::mutex> lock(cv_mutex);
+    if(shift % (interval/1000) == 0){
+        m_model->forceSync();
+        shift = 0;
+    }
+    cv.wait(lock, [&] { return refresh_ui_continue.load(); });
+    if (refresh_ui_continue.load()) {
         screen.Post([&] { shift++; });
-
         screen.Post(Event::Custom);
         lock.unlock();
     }
@@ -625,10 +627,7 @@ std::string ViewFTXuserInterface::getTypeUI()
 {
     return "FTX";
 }
-/*
+
 ViewFTXuserInterface::~ViewFTXuserInterface() {
-    if (refresh_ui.joinable()) {
-        refresh_ui.join();
-    }
+    m_FTXsyncTimer->stop();
 }
-*/
