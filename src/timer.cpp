@@ -1,4 +1,4 @@
-#include "..//inc/timer.hpp"
+#include "inc/timer.hpp"
 
 Timer::~Timer()
 {

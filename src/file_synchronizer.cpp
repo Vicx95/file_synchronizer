@@ -1,4 +1,4 @@
-#include "..//inc/file_synchronizer.hpp"
+#include "inc/file_synchronizer.hpp"
 
 void FileSynchronizer::synchronizeAdded(const std::vector<PathTimePair_t> &addedFiles)
 {

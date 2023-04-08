@@ -1,4 +1,5 @@
-#include "..//inc/view.hpp"
+#include "inc/view.hpp"
+#include "inc/view_console.hpp"
 
 void View::printMenu()
 {
@@ -20,6 +21,7 @@ void View::printOptions()
               << "10. Read config  \n"
               << "11. Save config  \n";
 }
+
 
 void View::printDirectory(const fs::path &path)
 {
@@ -97,3 +99,11 @@ void View::printFiles(const std::set<fs::path> &fileDirList)
         }
     }
 }
+/*
+void ViewConsoleUserInterface::run(const fs::path &path)
+{
+    fs::path spath = path;
+    printMenu();
+    printOptions();
+}
+*/

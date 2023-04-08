@@ -1,9 +1,9 @@
-#include "..//inc/model.hpp"
-#include "..//inc/file_synchronizer.hpp"
-#include "..//inc/scanner.hpp"
-#include "..//inc/serializer.hpp"
-#include "..//inc/thread_pool_provider.hpp"
-#include "..//inc/timer.hpp"
+#include "inc/model.hpp"
+#include "inc/file_synchronizer.hpp"
+#include "inc/scanner.hpp"
+#include "inc/serializer.hpp"
+#include "inc/thread_pool_provider.hpp"
+#include "inc/timer.hpp"
 
 namespace fs = std::filesystem;
 
@@ -78,23 +78,50 @@ ErrorCode Model::removeDirectory(const std::string &dirName)
     return ErrorCode::FAIL;
 }
 
-ErrorCode Model::removeFile(const std::string &dirName)
+ErrorCode Model::removeFile(std::istream &std_input)
 {
-    if (validateForRemoval(dirName))
+    std::set<std::string> fileNames;
+    for (auto const &fileEntry : fs::recursive_directory_iterator(m_mainDirectoryPath))
     {
-        fs::current_path(m_mainDirectoryPath / dirName);
-        std::cout << "Give file name to remove: \n";
-        std::string fileName;
-        std::cin.clear();
-        std::cin >> fileName;
-        if (validateForRemoval(dirName + "/" + fileName))
+        if (fileEntry.is_regular_file())
         {
-            fs::remove(m_mainDirectoryPath / dirName / fileName);
-
-            return ErrorCode::SUCCESS;
+            fileNames.insert(fileEntry.path().filename());
         }
     }
-    return ErrorCode::FAIL;
+    std::cout << "List of all files: \n";
+    for (auto const &file : fileNames)
+    {
+        std::cout << file << "\n";
+    }
+
+    std::cout << "Select file which you want delete: \n";
+    std::string file;
+    std::cin.clear();
+    std_input >> file;
+    for (auto dir : fs::directory_iterator(m_mainDirectoryPath))
+    {
+        // std::lock_guard<std::mutex> lock(m_mutex);
+        try
+        {
+            if (fs::exists(dir.path() / file))
+            {
+                fs::remove(dir.path() / file);
+                std::cout << "Removed file in directory:" << dir.path().filename() << "\n";
+            }
+            else
+            {
+                std::cout << "Not exist file in directory:" << dir.path().filename() << "\n";
+            }
+        }
+        catch (std::exception &e)
+        {
+            std::cout << e.what();
+        }
+    }
+    m_scanner->scan(m_mainDirectoryPath);
+    saveConfig();
+
+    return ErrorCode::SUCCESS;
 }
 
 ErrorCode Model::getAllFilesInDir(const std::string &dirName, std::set<fs::path> &fileList)

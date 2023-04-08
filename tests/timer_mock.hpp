@@ -1,4 +1,6 @@
-#include "..//inc/timer.hpp"
+#pragma once
+
+#include "timer.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 
 class MockTimer : public i_Timer

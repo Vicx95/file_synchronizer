@@ -1,11 +1,12 @@
-#include "..//inc/controller.hpp"
-#include "..//inc/logger.hpp"
-#include "..//inc/model.hpp"
-#include "..//inc/thread_pool_provider.hpp"
-#include "..//inc/view.hpp"
+#include "inc/controller.hpp"
+#include "inc/logger.hpp"
+#include "inc/model.hpp"
+#include "inc/thread_pool_provider.hpp"
+#include "inc/view.hpp"
+#include "inc/view_ftx.hpp"
 
 Controller::Controller()
-    : Controller(std::make_unique<View>(), std::make_unique<Model>())
+    : Controller(std::make_unique<ViewFTXuserInterface>(), std::make_unique<Model>())
 {
 }
 
@@ -17,21 +18,27 @@ Controller::Controller(std::unique_ptr<View> view, std::unique_ptr<Model> model)
 
 void Controller::run()
 {
-    while (!m_isExitRequested)
-    {
-        m_view->printMenu();
-        m_view->printOptions();
-
-        if (auto input = getKeyboardInput(); !input.has_value())
+    if(m_view->getTypeUI() == "FTX"){
+        m_view->setModel(m_model.get());
+        m_view->run(m_model->getMainDirectoryPath());
+    }
+    else{
+        while (!m_isExitRequested)
         {
-            std::this_thread::sleep_for(Config_UISleepFor);
-            m_view->printMessage(View::Message::Incorrect);
+            m_view->printMenu();
+            m_view->printOptions();
 
-            continue;
-        }
-        else if (Handlers::Action mappedKey = static_cast<Handlers::Action>(std::stoul(input.value())); h.m_handlerMap.contains(mappedKey))
-        {
-            std::invoke(h.m_handlerMap.at(mappedKey), this);
+            if (auto input = getKeyboardInput(); !input.has_value())
+            {
+                std::this_thread::sleep_for(Config_UISleepFor);
+                m_view->printMessage(View::Message::Incorrect);
+
+                continue;
+            }
+            else if (Handlers::Action mappedKey = static_cast<Handlers::Action>(std::stoul(input.value())); h.m_handlerMap.contains(mappedKey))
+            {
+                std::invoke(h.m_handlerMap.at(mappedKey), this);
+            }
         }
     }
 }
@@ -110,7 +117,7 @@ void Controller::removeFile()
 {
     m_view->printMessage(View::Message::RemoveFile);
 
-    this->process(&Model::removeFile);
+    // this->process(&Model::removeFile);
 }
 void Controller::printDirectory()
 {
@@ -125,13 +132,13 @@ void Controller::printFiles()
 
     if (auto input = getKeyboardInput(); input.has_value())
     {
-        if (input.value() == "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath(),fileList))
+        if (input.value() == "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath(), fileList))
         {
             m_view->printMessage(View::Message::FolderEmpty);
             waitForButton();
         }
 
-        if(input.value() != "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath() / input.value(),fileList))
+        if (input.value() != "all" && ErrorCode::SUCCESS != m_model->getAllFilesInDir(m_model->getMainDirectoryPath() / input.value(), fileList))
         {
             m_view->printMessage(View::Message::FolderEmpty);
             waitForButton();

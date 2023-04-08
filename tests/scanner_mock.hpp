@@ -1,4 +1,6 @@
-#include "..//inc/scanner.hpp"
+#pragma once
+
+#include "scanner.hpp"
 #include "gmock/gmock.h" // Brings in gMock.
 
 class MockScanner : public i_Scanner

@@ -1,5 +1,6 @@
-#include "..//inc/model.hpp"
+#include "model.hpp"
 #include "scanner_mock.hpp"
+#include "serializer_mock.hpp"
 #include "synchronizer_mock.hpp"
 #include "timer_mock.hpp"
 
@@ -66,30 +67,33 @@ protected:
 
 TEST_F(ModelTest, ModelReqestStartSync)
 {
-    auto timer = std::make_unique<MockTimer>();
-    auto synchronizer = std::make_unique<MockSynchronizer>();
-    auto scanner = std::make_unique<MockScanner>();
-    std::unique_ptr<i_Serializer> serializer = nullptr;
+    std::unique_ptr<MockTimer> timer = std::make_unique<MockTimer>();
+    std::unique_ptr<MockSynchronizer> synchronizer = std::make_unique<MockSynchronizer>();
+    std::unique_ptr<MockScanner> scanner = std::make_unique<MockScanner>();
+    std::unique_ptr<MockSerializer> serializer = std::make_unique<MockSerializer>();
 
-    auto timer_ref = timer.get();
-    auto synchronizer_ref = synchronizer.get();
-    auto scanner_ref = scanner.get();
+    auto timer_ptr = timer.get();
+    auto synch_ptr = synchronizer.get();
+    auto scanner_ptr = scanner.get();
+    auto serial_ptr = serializer.get();
+
+    (void)serial_ptr;
 
     Model m(std::move(timer), std::move(synchronizer), std::move(scanner), std::move(serializer));
 
     Callback cb;
-    EXPECT_CALL(*timer_ref, start).WillOnce([&cb](const Interval &interval, const Callback &timeoutCallback) {
+    EXPECT_CALL(*timer_ptr, start).WillOnce([&cb](const Interval &interval, const Callback &timeoutCallback) {
         EXPECT_EQ(interval, 1000ms);
         cb = timeoutCallback; });
 
     m.startSync();
 
-    EXPECT_CALL(*scanner_ref, scan);
-    EXPECT_CALL(*scanner_ref, scanForChangedDirs).Times(2);
-    EXPECT_CALL(*scanner_ref, comparePreviousAndRecentScanning);
+    EXPECT_CALL(*scanner_ptr, scan);
+    EXPECT_CALL(*scanner_ptr, scanForChangedDirs).Times(2);
+    EXPECT_CALL(*scanner_ptr, comparePreviousAndRecentScanning);
 
-    EXPECT_CALL(*synchronizer_ref, synchronizeAdded);
-    EXPECT_CALL(*synchronizer_ref, synchronizeRemoved);
+    EXPECT_CALL(*synch_ptr, synchronizeAdded);
+    EXPECT_CALL(*synch_ptr, synchronizeRemoved);
 
     cb();
 }

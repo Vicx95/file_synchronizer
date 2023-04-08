@@ -1,4 +1,4 @@
-#include "..//inc/scanner.hpp"
+#include "inc/scanner.hpp"
 //#include "..//inc/logger.hpp"
 
 Scanner::Scanner()
