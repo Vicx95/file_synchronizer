@@ -71,10 +71,12 @@ void ViewFTXuserInterface::run(const fs::path &path)
     int dirSelected = 0;
     auto menu_option = MenuOption();
     refreshDir(dirNames, path);
+    bool enterRemoveDir = false;
     menu_option.on_enter = [&] {
         std::stringstream rmStream(*(dirNames.begin() + dirSelected));
         m_model->removeDirectory(rmStream.str()); // listener->removeDirectory(rmStream); ->  controller->removeDirectory() TODO:
         refreshDir(dirNames, path);
+        enterRemoveDir = true;
     };
     Component inputRemove = Menu(&dirNames, &dirSelected, menu_option);
 
@@ -85,58 +87,7 @@ void ViewFTXuserInterface::run(const fs::path &path)
     std::vector<std::vector<std::string>> filesX;
     std::deque<bool> dirMenuShow;
 
-    for (auto dir : fs::directory_iterator(path))
-    {
-        if (!dir.is_regular_file())
-        {
-            dirsX.push_back(dir.path().filename());
-            dirMenuShow.push_back(false);
-        }
-    }
-    std::sort(dirsX.begin(), dirsX.end());
-
-    for (auto dir : dirsX)
-    {
-        std::vector<std::string> filesInDir;
-        for (auto const &fileEntry : fs::recursive_directory_iterator(path / dir))
-        {
-            if (fileEntry.is_regular_file())
-            {
-                filesInDir.push_back((fileEntry.path().filename()));
-            }
-        }
-        std::sort(filesInDir.begin(), filesInDir.end());
-        filesX.push_back(filesInDir);
-    }
-
-    auto checkAndMenuboxes = Container::Vertical({});
-    auto removefileMenuOption = MenuOption();
-    refreshDir(dirsX, path);
-
-    std::vector<int>::size_type it = 0;
-    int selectedMenuFile = 0;
-
-    for (auto dir : dirsX)
-    {
-        checkAndMenuboxes->Add(
-            Checkbox(dir, &dirMenuShow[it]));
-
-        auto current_it = it;
-        removefileMenuOption.on_enter = [&, current_it] {
-            if (filesX[current_it].size() > (std::vector<std::string>::size_type)selectedMenuFile)
-            { // check if selected file exists
-                auto it_file = filesX[current_it].begin() + selectedMenuFile;
-                std::stringstream rmStream(*it_file); // create stream for file name
-                // listener->removeFile(rmStream);
-                m_model->removeFile(rmStream);
-                refreshFile(dirsX, filesX, path);
-            }
-        };
-
-        checkAndMenuboxes->Add(
-            Menu(&filesX[it], &selectedMenuFile, removefileMenuOption) | border | Maybe(&dirMenuShow[it]));
-        it++;
-    }
+    auto checkAndMenuboxes = createRemoveFile(dirsX, filesX, dirMenuShow, path);
 
     auto layoutRemoveFile = Container::Vertical({
         checkAndMenuboxes,
@@ -193,38 +144,30 @@ void ViewFTXuserInterface::run(const fs::path &path)
     // Read config
     //---------------------------------------------------------------------
  
-  int compiler_selected = 0;
-  Component compiler = Radiobox(&dirsX, &compiler_selected);
+  int machine_selected = 0;
+  Component machinesBox = Radiobox(&dirsX, &machine_selected);
  
     
     std::deque<bool> filesOptionsState;
     std::vector<std::string> filesOptionsLabel;
     fs::path tmpDir = ""; 
-    Component flags = Container::Vertical({});
+    Component tmpFiles = Container::Vertical({});
 
-  std::vector<std::string> input_entriesC;
-  int input_selectedC = 0;
-  auto input_optionListC = MenuOption();
-  input_optionListC.on_enter = [&] {
-  std::string tmpUsedPath = input_entriesC[input_selectedC];
-  input_entriesC.clear();
-  input_entriesC.push_back(tmpUsedPath);
-  refreshDir(dirsX, path);
-  };
-  Component inputC = Menu(&input_entriesC, &input_selectedC, input_optionListC);
- 
-  
+  std::vector<std::string> insertedPaths;
+  int insertedPathSelected = 0;
 
-  auto input_optionC = InputOption();
-  std::string input_add_contentC;
-  input_optionC.on_enter = [&] {
-    input_entriesC.push_back(input_add_contentC);
-    input_add_contentC = "";
+  Component insertedTmpConfigPaths = createInsertedPathBox(dirsX, insertedPaths, insertedPathSelected, path);
 
-    //flags
+  auto inputPathOption = InputOption();
+  std::string inputAddContent;
+  inputPathOption.on_enter = [&] {
+    insertedPaths.push_back(inputAddContent);
+    inputAddContent = "";
+
+    //tmpFiles
     filesOptionsState.clear();
     filesOptionsLabel.clear();
-    tmpDir = input_entriesC.back();
+    tmpDir = insertedPaths.back();
     if (std::filesystem::exists(tmpDir)){
         for (auto const &fileEntry : fs::recursive_directory_iterator(tmpDir))
         {
@@ -237,25 +180,22 @@ void ViewFTXuserInterface::run(const fs::path &path)
     }
     std::sort(filesOptionsLabel.begin(), filesOptionsLabel.end());
     int fileOptionsIter = 0;
-    flags->DetachAllChildren();
+    tmpFiles->DetachAllChildren();
     for(auto file : filesOptionsLabel){
-        flags->Add(Checkbox(file, &filesOptionsState[fileOptionsIter]));
+        tmpFiles->Add(Checkbox(file, &filesOptionsState[fileOptionsIter]));
         fileOptionsIter++;
     }
   };
-  Component input_addC = Input(&input_add_contentC, "input path with tmpFiles", input_optionC);
+  Component inputPathToTmpConfig = Input(&inputAddContent, "input path with tmpFiles", inputPathOption);
  
-  //std::string executable_content_ = "";
-  //Component executable_ = Input(&executable_content_, "executable");
-    
-    //auto action = [&] {  };
- 
+  //Component inputPathToTmpConfig = createInputPathBox(tmpFiles, filesOptionsState, filesOptionsLabel, insertedPaths, tmpDir);
+
     int valuexx = 0;
-    auto action = [&] { valuexx++; input_entriesC.push_back(std::to_string(valuexx)); 
+    auto action = [&] { valuexx++; insertedPaths.push_back(std::to_string(valuexx)); 
     
     for(size_t i = 0; i < filesOptionsLabel.size(); ++i){
         if (filesOptionsState[i]) {
-            std::filesystem::copy(tmpDir / filesOptionsLabel[i], path / dirsX[compiler_selected] / filesOptionsLabel[i], std::filesystem::copy_options::recursive);
+            std::filesystem::copy(tmpDir / filesOptionsLabel[i], path / dirsX[machine_selected] / filesOptionsLabel[i], std::filesystem::copy_options::recursive);
         }
     }
     
@@ -267,22 +207,22 @@ void ViewFTXuserInterface::run(const fs::path &path)
 
  
   auto compiler_component = Container::Horizontal({
-      compiler,
-      flags,
+      machinesBox,
+      tmpFiles,
       Container::Vertical({
           executable_,
           Container::Horizontal({
-              input_addC,
-              inputC,
+              inputPathToTmpConfig,
+              insertedTmpConfigPaths,
           }),
       }),
   });
  
   auto render_commandC = [&] {
     Elements line;
-    // Compiler
-    line.push_back(text(dirsX[compiler_selected]) | bold);
-    // flags
+    // machinesBox
+    line.push_back(text(dirsX[machine_selected]) | bold);
+    // tmpFiles
  
 
     for(size_t i = 0; i < filesOptionsLabel.size(); ++i){
@@ -292,15 +232,8 @@ void ViewFTXuserInterface::run(const fs::path &path)
         }
     }
 
-    // Executable
-    // if (!executable_content_.empty()) {
-    //   line.push_back(text(" -o ") | bold);
-    //   line.push_back(text(executable_content_) | color(Color::BlueLight) |
-    //                  bold);
-    // }
-
     // Input
-    for (auto& it : input_entriesC) {
+    for (auto& it : insertedPaths) {
       line.push_back(text(" " + it) | color(Color::RedLight));
     }
     return line;
@@ -313,9 +246,9 @@ void ViewFTXuserInterface::run(const fs::path &path)
             enterReadConfig = false;
         }
     auto compiler_win = window(text("Dirs/Machines"),
-                               compiler->Render() | vscroll_indicator | frame);
-    auto flags_win =
-        window(text("tmpFiles"), flags->Render() | vscroll_indicator | frame);
+                               machinesBox->Render() | vscroll_indicator | frame);
+    auto tmpFiles_win =
+        window(text("tmpFiles"), tmpFiles->Render() | vscroll_indicator | frame);
     auto executable_win = window(text("Apply changes:"), executable_->Render());
    // auto action_win = window(text("Executable:"), action_renderer->Render());
 
@@ -324,19 +257,19 @@ void ViewFTXuserInterface::run(const fs::path &path)
                                   vbox({
                                       hbox({
                                           text("Add: "),
-                                          input_addC->Render(),
+                                          inputPathToTmpConfig->Render(),
                                       }) | size(WIDTH, EQUAL, 35) |
                                           size(HEIGHT, EQUAL, 1),
                                       filler(),
                                   }),
                                   separator(),
-                                  inputC->Render() | vscroll_indicator | frame |
+                                  insertedTmpConfigPaths->Render() | vscroll_indicator | frame |
                                       size(HEIGHT, EQUAL, 3) | flex,
                               }));
     return vbox({
                hbox({
                    compiler_win,
-                   flags_win,
+                   tmpFiles_win,
                    vbox({
                        executable_win, // | size(WIDTH, EQUAL, 20),
                       // action_win | size(WIDTH, EQUAL, 20),
@@ -379,10 +312,22 @@ void ViewFTXuserInterface::run(const fs::path &path)
                 enterInputDir = false;
                 m_model->addDirectory(input_entries.back()); // listener->addDirectory(InputDirName);
                 refreshDir(dirNames, path);
+                dirsX = dirNames;
+            }
+            if(enterRemoveDir)
+            {
+                enterRemoveDir = false;
+                refreshDir(dirsX, path);
+                checkAndMenuboxes = createRemoveFile(dirsX, filesX, dirMenuShow, path);
+                layoutRemoveFile->DetachAllChildren();
+                layoutRemoveFile->Add(checkAndMenuboxes);
             }
             tableDirs = printDir(path); // listener->printDirectory(); -> ->  TODO:  controller->addDirectory()
             generateColorTable(&tableDirs);
             printDirTable = tableDirs.Render();
+            checkAndMenuboxes = createRemoveFile(dirsX, filesX, dirMenuShow, path);
+            layoutRemoveFile->DetachAllChildren();
+            layoutRemoveFile->Add(checkAndMenuboxes);
         }
  
         return line;
@@ -463,6 +408,113 @@ ftxui::Component ViewFTXuserInterface::createButtons(std::deque<bool *> &showBut
     });
 
     return buttons;
+}
+
+ftxui::Component ViewFTXuserInterface::createRemoveFile(std::vector<std::string> &dirsX, std::vector<std::vector<std::string>> &filesX, std::deque<bool> &dirMenuShow, const fs::path &path)
+{
+    dirsX.clear();
+    for (auto dir : fs::directory_iterator(path))
+    {
+        if (!dir.is_regular_file())
+        {
+            dirsX.push_back(dir.path().filename());
+            dirMenuShow.push_back(false);
+        }
+    }
+    std::sort(dirsX.begin(), dirsX.end());
+
+    for (auto dir : dirsX)
+    {
+        std::vector<std::string> filesInDir;
+        for (auto const &fileEntry : fs::recursive_directory_iterator(path / dir))
+        {
+            if (fileEntry.is_regular_file())
+            {
+                filesInDir.push_back((fileEntry.path().filename()));
+            }
+        }
+        std::sort(filesInDir.begin(), filesInDir.end());
+        filesX.push_back(filesInDir);
+    }
+
+    auto checkAndMenuboxes = Container::Vertical({});
+    auto removefileMenuOption = MenuOption();
+
+    std::vector<int>::size_type it = 0;
+    int selectedMenuFile = 0;
+
+    for (auto dir : dirsX)
+    {
+        checkAndMenuboxes->Add(
+            Checkbox(dir, &dirMenuShow[it]));
+
+        auto current_it = it;
+        removefileMenuOption.on_enter = [&, current_it] {
+            if (filesX[current_it].size() > (std::vector<std::string>::size_type)selectedMenuFile)
+            { // check if selected file exists
+                auto it_file = filesX[current_it].begin() + selectedMenuFile;
+                std::stringstream rmStream(*it_file); // create stream for file name
+                // listener->removeFile(rmStream);
+                m_model->removeFile(rmStream);
+                refreshDir(dirsX, path);
+                refreshFile(dirsX, filesX, path);
+            }
+        };
+
+        checkAndMenuboxes->Add(
+            Menu(&filesX[it], &selectedMenuFile, removefileMenuOption) | border | Maybe(&dirMenuShow[it]));
+        it++;
+    }
+    return checkAndMenuboxes;
+}
+
+ftxui::Component ViewFTXuserInterface::createInsertedPathBox(std::vector<std::string> &dirsX, std::vector<std::string> &insertedPaths, int &insertedPathSelected, const fs::path &path)
+{
+    auto insertedOptionList = MenuOption();
+    insertedOptionList.on_enter = [&] {
+    std::string tmpUsedPath = insertedPaths[insertedPathSelected];
+        insertedPaths.clear();
+        insertedPaths.push_back(tmpUsedPath);
+        refreshDir(dirsX, path);
+    };
+    Component insertedTmpConfigPaths = Menu(&insertedPaths, &insertedPathSelected, insertedOptionList);
+    return insertedTmpConfigPaths;
+}
+  
+ftxui::Component ViewFTXuserInterface::createInputPathBox(ftxui::Component &tmpFiles, std::deque<bool> &filesOptionsState, std::vector<std::string> &filesOptionsLabel, std::vector<std::string> &insertedPaths, fs::path &tmpDir)
+{
+  auto inputPathOption = InputOption();
+  std::string inputAddContent;
+  inputPathOption.on_enter = [&] {
+    insertedPaths.push_back(inputAddContent);
+    inputAddContent = "";
+
+    //tmpFiles
+    filesOptionsState.clear();
+    filesOptionsLabel.clear();
+    tmpDir = insertedPaths.back();
+    if (std::filesystem::exists(tmpDir)){
+        for (auto const &fileEntry : fs::recursive_directory_iterator(tmpDir))
+        {
+            if (fileEntry.is_regular_file())
+            {
+                filesOptionsState.push_back(false);
+                filesOptionsLabel.push_back(fileEntry.path().filename());
+            }
+        }
+    }
+    
+    std::sort(filesOptionsLabel.begin(), filesOptionsLabel.end());
+    int fileOptionsIter = 0;
+    tmpFiles->DetachAllChildren();
+    for(auto file : filesOptionsLabel){
+        tmpFiles->Add(Checkbox(file, &filesOptionsState[fileOptionsIter]));
+        fileOptionsIter++;
+    }
+  };
+  Component inputPathToTmpConfig = Input(&inputAddContent, "input path with tmpFiles", inputPathOption);
+ 
+ return inputPathToTmpConfig;
 }
 
 void ViewFTXuserInterface::hideMenuButtons(std::deque<bool *> &showButtons)

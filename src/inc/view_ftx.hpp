@@ -26,6 +26,10 @@ public:
     std::string getTypeUI() override; 
 
     ftxui::Component createButtons(std::deque<bool *> &showButtons, std::condition_variable &cv, std::atomic<bool> &refresh_ui_continue, ftxui::ScreenInteractive &screen, bool &enterReadConfig);
+    ftxui::Component createRemoveFile(std::vector<std::string> &dirsX, std::vector<std::vector<std::string>> &filesX, std::deque<bool> &dirMenuShow, const fs::path &path);
+    ftxui::Component createInsertedPathBox(std::vector<std::string> &dirsX, std::vector<std::string> &insertedPaths, int &insertedPathSelected, const fs::path &path);
+    ftxui::Component createInputPathBox(ftxui::Component &tmpFiles, std::deque<bool> &filesOptionsState, std::vector<std::string> &filesOptionsLabel, std::vector<std::string> &insertedPaths, fs::path &tmpDir);
+
     void hideMenuButtons(std::deque<bool *> &showButtons);
     void refreshDir(std::vector<std::string> &dirNames, const fs::path &path);
     void refreshFile(std::vector<std::string> &dirNames, std::vector<std::vector<std::string>> &filesNames, const fs::path &path);
