@@ -4,6 +4,7 @@
 #include "scanner.hpp"
 #include "serializer.hpp"
 #include "timer.hpp"
+#include "streaming.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -25,7 +26,8 @@ public:
     explicit Model(std::unique_ptr<i_Timer> syncTimer,
                    std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
                    std::unique_ptr<i_Scanner> scanner,
-                   std::unique_ptr<i_Serializer> serializer) noexcept;
+                   std::unique_ptr<i_Serializer> serializer,
+                   std::unique_ptr<Stream> stream) noexcept;
 
     virtual ~Model() = default;
 
@@ -42,6 +44,7 @@ public:
     void forceSync();
     void readConfig();
     void saveConfig();
+    void setupStreaming();
     fs::path getMainDirectoryPath();
 
 private:
@@ -51,6 +54,8 @@ private:
     std::unique_ptr<i_FileSynchronizer> m_fileSynchronizer = nullptr;
     std::unique_ptr<i_Scanner> m_scanner = nullptr;
     std::unique_ptr<i_Serializer> m_serializer = nullptr;
+    std::unique_ptr<Stream> m_stream = nullptr;
+
 
     std::chrono::duration<int64_t, std::milli> m_interval;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";

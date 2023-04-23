@@ -20,6 +20,7 @@ set(SOURCES
     src/file_synchronizer.cpp
     src/scanner.cpp
     src/serializer.cpp
+    src/streaming.cpp
     src/logger.cpp
     #src/thread_pool.cpp
     )

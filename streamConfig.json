@@ -1,0 +1,8 @@
+{
+    "Dir1": ["File1.txt", "File2.txt"],
+    "Dir2": [
+        "File3.txt", "File1.txt"
+    ],
+    "Dir4": [],
+    "Dir3": ["File3.txt", "File1.txt", "File4.txt"]
+}

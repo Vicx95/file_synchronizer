@@ -18,7 +18,9 @@ void View::printOptions()
               << "8. Stop sync-up  \n"
               << "9. Force sync-up  \n"
               << "10. Read config  \n"
-              << "11. Save config  \n";
+              << "11. Save config  \n"
+              << "12. Setup streaming  \n";
+
 }
 
 void View::printDirectory(const fs::path &path)

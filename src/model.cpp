@@ -8,18 +8,20 @@
 namespace fs = std::filesystem;
 
 Model::Model()
-    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>(), std::make_unique<SerializerToJSON>())
+    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>(), std::make_unique<SerializerToJSON>(), std::make_unique<Stream>())
 {
 }
 
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
              std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
              std::unique_ptr<i_Scanner> scanner,
-             std::unique_ptr<i_Serializer> serializer) noexcept
+             std::unique_ptr<i_Serializer> serializer,
+             std::unique_ptr<Stream> stream) noexcept
     : m_syncTimer(std::move(syncTimer)),               //
       m_fileSynchronizer(std::move(fileSynchronizer)), //
       m_scanner(std::move(scanner)),                   //
       m_serializer(std::move(serializer)),             //
+      m_stream(std::move(stream)),
       m_interval(1000)                                 //
       {
 
@@ -147,7 +149,8 @@ void Model::readConfig()
 {
     fs::remove_all(m_mainDirectoryPath);
     fs::create_directory(m_mainDirectoryPath);
-    auto [dirs, files] = m_serializer->deserialize();
+    fs::path configPath = m_mainDirectoryPath / "config.json";
+    //auto [dirs, files] = m_serializer->deserialize(configPath);
     std::filesystem::copy(m_mainDirectoryPath / "../configDirectory", m_mainDirectoryPath, std::filesystem::copy_options::recursive);
 }
 
@@ -157,4 +160,9 @@ void Model::saveConfig()
     std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
 
     m_serializer->serialize();
+}
+
+void Model::setupStreaming()
+{
+    m_stream->loadStreaming();
 }

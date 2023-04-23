@@ -44,6 +44,7 @@ private:
             ForceSync = 9,
             ReadConfig = 10,
             SaveConfig = 11,
+            SetupStreaming = 12,
             Exit = 0
         };
 
@@ -68,6 +69,7 @@ private:
     void forceSync();
     void readConfig();
     void saveConfig();
+    void setupStreaming();
     void exit();
 
     std::atomic<bool> m_isExitRequested = false;

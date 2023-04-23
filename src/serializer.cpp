@@ -34,12 +34,13 @@ void SerializerToJSON::serialize()
     file << std::setw(4) << config;
 }
 
-DirsAndFiles SerializerToJSON::deserialize()
+std::vector<DirsAndFiles> SerializerToJSON::deserialize(const std::string &filePath)
 {
-    std::ifstream config("../config.json");
+    std::ifstream config(filePath);
     json dirAndFilesJSON = json::parse(config);
     std::vector<std::string> Dirs;
     std::vector<std::vector<std::string>> files;
+    std::vector<DirsAndFiles> result;
 
     for (json::iterator it = dirAndFilesJSON.begin(); it != dirAndFilesJSON.end(); ++it)
     {
@@ -50,8 +51,10 @@ DirsAndFiles SerializerToJSON::deserialize()
             filesInDir.push_back(fileInDir);
         }
         files.push_back(filesInDir);
+        result.push_back(std::make_pair(it.key(), filesInDir));
     }
-    return {std::make_pair(Dirs, files)};
+    return result;
+
 }
 
 void SerializerToTxt::serialize()
@@ -93,9 +96,9 @@ void SerializerToTxt::serialize()
     }
 }
 
-DirsAndFiles SerializerToTxt::deserialize()
+std::vector<DirsAndFiles> SerializerToTxt::deserialize(const std::string &filePath)
 {
-    std::ifstream config("../config.txt");
+    std::ifstream config(filePath);
     std::string dirAndFilesTXT;
     std::vector<std::string> Dirs;
     std::vector<std::vector<std::string>> files;

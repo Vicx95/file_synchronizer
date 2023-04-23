@@ -70,12 +70,13 @@ TEST_F(ModelTest, ModelReqestStartSync)
     auto synchronizer = std::make_unique<MockSynchronizer>();
     auto scanner = std::make_unique<MockScanner>();
     std::unique_ptr<i_Serializer> serializer = nullptr;
+    std::unique_ptr<Stream> stream = nullptr;
 
     auto timer_ref = timer.get();
     auto synchronizer_ref = synchronizer.get();
     auto scanner_ref = scanner.get();
 
-    Model m(std::move(timer), std::move(synchronizer), std::move(scanner), std::move(serializer));
+    Model m(std::move(timer), std::move(synchronizer), std::move(scanner), std::move(serializer), std::move(stream));
 
     Callback cb;
     EXPECT_CALL(*timer_ref, start).WillOnce([&cb](const Interval &interval, const Callback &timeoutCallback) {
