@@ -19,7 +19,8 @@ void View::printOptions()
               << "9. Force sync-up  \n"
               << "10. Read config  \n"
               << "11. Save config  \n"
-              << "12. Setup streaming  \n";
+              << "12. Setup streaming  \n"
+              << "13. Setup network  \n";
 
 }
 

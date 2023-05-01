@@ -3,9 +3,9 @@
 
 void Stream::loadStreaming()
 {
-    fs::path streamConfigPath = "/file_synchronizer/streamConfig.json";
-    fs::path tmpConfigPath = "/file_synchronizer/tmpConfig";    
-    fs::path mainDirectoryPath = "/file_synchronizer/mainDirectory";    
+    fs::path streamConfigPath = "/home/file_synchronizer/streamConfig.json";
+    fs::path tmpConfigPath = "/home/file_synchronizer/tmpConfig";    
+    fs::path mainDirectoryPath = "/home/file_synchronizer/mainDirectory";    
     
     std::vector<DirsAndFiles> machines = m_serializer->deserialize(streamConfigPath);
     std::vector<DirsAndFiles> rejectedMachines = machines;
@@ -43,6 +43,44 @@ void Stream::loadStreaming()
         }
         std::cout << dir << ": ";
         std::for_each(files.cbegin(), files.cend(), printFileName);
+        std::cout << "\n";   
+    }
+}
+
+void Stream::loadNetwork()
+{
+    fs::path networkConfigPath = "/home/file_synchronizer/networkConfig.json";
+    fs::path mainDirectoryPath = "/home/file_synchronizer/mainDirectory";    
+    
+    std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork = m_serializer->deserializeNetwork(networkConfigPath);
+    std::vector<std::pair<std::string, std::pair<std::string, std::string>>> rejectedMachinesNetwork = machinesNetwork;
+
+    std::cout << "JSON network configuration: \n";
+    for(const auto &machine : machinesNetwork)
+    {
+        auto [dir, network] = machine;
+        std::cout << dir << ": " << network.first << " - " << network.second;
+        std::cout << "\n";   
+    }
+    auto dirNotExists = [&mainDirectoryPath](auto &directory) { return !fs::exists(mainDirectoryPath / directory.first); };
+    auto dirExists = [&mainDirectoryPath](auto &directory) { return fs::exists(mainDirectoryPath / directory.first); };
+
+    machinesNetwork.erase(std::remove_if(machinesNetwork.begin(), machinesNetwork.end(), dirNotExists), machinesNetwork.end());
+    rejectedMachinesNetwork.erase(std::remove_if(rejectedMachinesNetwork.begin(), rejectedMachinesNetwork.end(), dirExists), rejectedMachinesNetwork.end());
+
+    std::cout << "List of applied network configuration: \n";
+    for(const auto &machine : machinesNetwork)
+    {
+        auto [dir, network] = machine;
+        std::cout << dir << ": " << network.first << " - " << network.second;
+        std::cout << "\n";   
+    }
+
+    std::cout << "List of rejected network configuration: \n";
+    for(const auto &machine : rejectedMachinesNetwork)
+    {
+        auto [dir, network] = machine;
+        std::cout << dir << ": " << network.first << " - " << network.second;
         std::cout << "\n";   
     }
 }

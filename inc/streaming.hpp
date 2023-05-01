@@ -7,6 +7,8 @@ class Stream
 public:
 
     void loadStreaming();
+    void loadNetwork();
+
 
 
 private:

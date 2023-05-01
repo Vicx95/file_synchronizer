@@ -51,6 +51,7 @@ void Controller::init()
         {Handlers::Action::ReadConfig, &Controller::readConfig},
         {Handlers::Action::SaveConfig, &Controller::saveConfig},
         {Handlers::Action::SetupStreaming, &Controller::setupStreaming},
+        {Handlers::Action::SetupNetwork, &Controller::setupNetwork},
         {Handlers::Action::Exit, &Controller::exit} //
     };
 }
@@ -181,6 +182,11 @@ void Controller::saveConfig()
 void Controller::setupStreaming()
 {
     m_model->setupStreaming();
+}
+
+void Controller::setupNetwork()
+{
+    m_model->setupNetwork();
 }
 
 void Controller::exit()

@@ -166,3 +166,8 @@ void Model::setupStreaming()
 {
     m_stream->loadStreaming();
 }
+
+void Model::setupNetwork()
+{
+    m_stream->loadNetwork();
+}

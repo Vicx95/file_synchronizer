@@ -45,6 +45,7 @@ private:
             ReadConfig = 10,
             SaveConfig = 11,
             SetupStreaming = 12,
+            SetupNetwork = 13,
             Exit = 0
         };
 
@@ -70,6 +71,7 @@ private:
     void readConfig();
     void saveConfig();
     void setupStreaming();
+    void setupNetwork();
     void exit();
 
     std::atomic<bool> m_isExitRequested = false;

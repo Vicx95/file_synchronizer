@@ -45,6 +45,7 @@ public:
     void readConfig();
     void saveConfig();
     void setupStreaming();
+    void setupNetwork();
     fs::path getMainDirectoryPath();
 
 private:

@@ -57,6 +57,23 @@ std::vector<DirsAndFiles> SerializerToJSON::deserialize(const std::string &fileP
 
 }
 
+std::vector<std::pair<std::string, std::pair<std::string, std::string>>> SerializerToJSON::deserializeNetwork(const std::string &filePath)
+{
+    std::ifstream config(filePath);
+    json ipAndPortJSON = json::parse(config);
+//    std::vector<std::pair<std::string, std::string>> NetworkIpAdressAndPort;
+
+    std::vector<std::pair<std::string, std::pair<std::string, std::string>>> result;
+    for (auto& el : ipAndPortJSON.items()) {
+        std::string dir = el.key();
+        std::string ip = el.value()["ipAdress"];
+        std::string port = el.value()["port"];
+        result.push_back(std::make_pair(dir, std::make_pair(ip, port)));
+    }
+    return result;
+
+}
+
 void SerializerToTxt::serialize()
 {
     auto configOutputVector = m_scanner.getRecentScanning();
