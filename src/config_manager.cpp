@@ -1,11 +1,30 @@
-#include "..//inc/streaming.hpp"
+#include "..//inc/config_manager.hpp"
+ConfigManager::ConfigManager(const fs::path mainDirectoryPath) : m_mainDirectoryPath(mainDirectoryPath)
+{    
+}
 
-
-void Stream::loadStreaming()
+void ConfigManager::loadFileConfig()
 {
-    fs::path streamConfigPath = "/home/file_synchronizer/streamConfig.json";
-    fs::path tmpConfigPath = "/home/file_synchronizer/tmpConfig";    
-    fs::path mainDirectoryPath = "/home/file_synchronizer/mainDirectory";    
+    fs::remove_all(m_mainDirectoryPath);
+    fs::create_directory(m_mainDirectoryPath);
+    fs::path configPath = m_mainDirectoryPath / "config.json";
+    //auto [dirs, files] = m_serializer->deserialize(configPath);
+    std::filesystem::copy(m_mainDirectoryPath / "../configDirectory", m_mainDirectoryPath, std::filesystem::copy_options::recursive);
+}
+
+void ConfigManager::saveFileConfig()
+{
+    fs::remove_all(std::filesystem::current_path() / "../configDirectory");
+    std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
+
+    m_serializer->serialize();
+}
+
+void ConfigManager::loadStreamingConfig()
+{
+    fs::path streamConfigPath = "/home/maaniol/repos/direct/file_synchronizer/streamConfig.json";
+    fs::path tmpConfigPath = "/home/maaniol/repos/direct/file_synchronizer/tmpConfig";    
+    fs::path mainDirectoryPath = "/home/maaniol/repos/direct/file_synchronizer/mainDirectory";    
     
     std::vector<DirsAndFiles> machines = m_serializer->deserialize(streamConfigPath);
     std::vector<DirsAndFiles> rejectedMachines = machines;
@@ -46,10 +65,10 @@ void Stream::loadStreaming()
     }
 }
 
-void Stream::loadNetwork()
+void ConfigManager::loadNetworkConfig()
 {
-    fs::path networkConfigPath = "/home/file_synchronizer/networkConfig.json";
-    fs::path mainDirectoryPath = "/home/file_synchronizer/mainDirectory";    
+    fs::path networkConfigPath = "/home/maaniol/repos/direct/file_synchronizer/networkConfig.json";
+    fs::path mainDirectoryPath = "/home/maaniol/repos/direct/file_synchronizer/mainDirectory";    
     
     std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork = m_serializer->deserializeNetwork(networkConfigPath);
     std::vector<std::pair<std::string, std::pair<std::string, std::string>>> rejectedMachinesNetwork = machinesNetwork;
@@ -70,7 +89,7 @@ void Stream::loadNetwork()
     printMachineNetwork(rejectedMachinesNetwork);
 }
 
-void Stream::printMachineNetwork(std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork)
+void ConfigManager::printMachineNetwork(std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork)
 {
     for(const auto &machine : machinesNetwork)
     {
