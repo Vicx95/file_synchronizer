@@ -21,7 +21,6 @@ void Stream::loadStreaming()
     }
     std::cout << "List of applied streaming configuration: \n";
         auto dirNotExists = [&mainDirectoryPath](auto &directory) { return !fs::exists(mainDirectoryPath / directory.first); };
-        //std::copy_if(machines.begin(), machines.end(), std::back_inserter(rejectedMachines), dirNotExists);
         machines.erase(std::remove_if(machines.begin(), machines.end(), dirNotExists), machines.end());
 
     for(const auto &machine : machines)
@@ -56,12 +55,8 @@ void Stream::loadNetwork()
     std::vector<std::pair<std::string, std::pair<std::string, std::string>>> rejectedMachinesNetwork = machinesNetwork;
 
     std::cout << "JSON network configuration: \n";
-    for(const auto &machine : machinesNetwork)
-    {
-        auto [dir, network] = machine;
-        std::cout << dir << ": " << network.first << " - " << network.second;
-        std::cout << "\n";   
-    }
+    printMachineNetwork(machinesNetwork);
+
     auto dirNotExists = [&mainDirectoryPath](auto &directory) { return !fs::exists(mainDirectoryPath / directory.first); };
     auto dirExists = [&mainDirectoryPath](auto &directory) { return fs::exists(mainDirectoryPath / directory.first); };
 
@@ -69,18 +64,17 @@ void Stream::loadNetwork()
     rejectedMachinesNetwork.erase(std::remove_if(rejectedMachinesNetwork.begin(), rejectedMachinesNetwork.end(), dirExists), rejectedMachinesNetwork.end());
 
     std::cout << "List of applied network configuration: \n";
+    printMachineNetwork(machinesNetwork);
+
+    std::cout << "List of rejected network configuration: \n";
+    printMachineNetwork(rejectedMachinesNetwork);
+}
+
+void Stream::printMachineNetwork(std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork)
+{
     for(const auto &machine : machinesNetwork)
     {
         auto [dir, network] = machine;
-        std::cout << dir << ": " << network.first << " - " << network.second;
-        std::cout << "\n";   
-    }
-
-    std::cout << "List of rejected network configuration: \n";
-    for(const auto &machine : rejectedMachinesNetwork)
-    {
-        auto [dir, network] = machine;
-        std::cout << dir << ": " << network.first << " - " << network.second;
-        std::cout << "\n";   
+        std::cout << dir << ": " << network.first << " - " << network.second << "\n";
     }
 }

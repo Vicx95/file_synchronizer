@@ -8,6 +8,7 @@ public:
 
     void loadStreaming();
     void loadNetwork();
+    void printMachineNetwork(std::vector<std::pair<std::string, std::pair<std::string, std::string>>> machinesNetwork);
 
 
 
