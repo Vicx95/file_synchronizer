@@ -11,6 +11,12 @@ FetchContent_Declare(
   GIT_TAG release-1.12.1
 )
 
+find_package(Boost 1.74.0 REQUIRED system)
+IF(Boost_FOUND)
+  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+  LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+ENDIF(Boost_FOUND)
+
 set(SOURCES 
     src/controller.cpp
     src/main.cpp
@@ -21,6 +27,7 @@ set(SOURCES
     src/scanner.cpp
     src/serializer.cpp
     src/config_manager.cpp
+    src/file_streamer.cpp
     src/logger.cpp
     #src/thread_pool.cpp
     )
@@ -32,6 +39,7 @@ set(HEADERS
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 set(FLAGS -Wall -Wextra -Werror -Wconversion -Wpedantic -g)
 target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 FetchContent_MakeAvailable(googletest)
 

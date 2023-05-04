@@ -12,6 +12,7 @@ namespace fs = std::filesystem;
 
 using json = nlohmann::json;
 using DirsAndFiles = std::pair<std::string, std::vector<std::string>>;
+using DirsAndNetworkParams = std::pair<std::string, std::pair<std::string, std::string>>;
 
 class i_Serializer
 {
@@ -20,7 +21,7 @@ public:
 
     virtual void serialize() = 0;
     virtual std::vector<DirsAndFiles> deserialize(const std::string &filePath) = 0;
-    virtual std::vector<std::pair<std::string, std::pair<std::string, std::string>>> deserializeNetwork(const std::string &filePath) = 0;
+    virtual std::vector<DirsAndNetworkParams> deserializeNetwork(const std::string &filePath) = 0;
 
 };
 
@@ -31,7 +32,7 @@ class SerializerToJSON : public i_Serializer
 public:
     void serialize() override;
     std::vector<DirsAndFiles> deserialize(const std::string &filePath) override;
-    std::vector<std::pair<std::string, std::pair<std::string, std::string>>> deserializeNetwork(const std::string &filePath) override;
+    std::vector<DirsAndNetworkParams> deserializeNetwork(const std::string &filePath) override;
 };
 
 class SerializerToTxt : public i_Serializer

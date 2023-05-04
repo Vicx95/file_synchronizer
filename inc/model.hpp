@@ -5,6 +5,7 @@
 #include "serializer.hpp"
 #include "timer.hpp"
 #include "config_manager.hpp"
+#include "file_streamer.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -45,6 +46,8 @@ public:
     void saveConfig();
     void setupStreaming();
     void setupNetwork();
+    void startStreaming();
+    void stopStreaming();
     fs::path getMainDirectoryPath();
 
 private:
@@ -57,4 +60,9 @@ private:
 
     std::chrono::duration<int64_t, std::milli> m_interval;
     const fs::path m_mainDirectoryPath = std::filesystem::current_path() / "../mainDirectory";
+
+    std::vector<DirsAndFiles> m_fileStreamingConfig;
+    std::vector<DirsAndNetworkParams> m_networkConfig;
+    std::unordered_map<std::string, std::unique_ptr<i_FileStreamer>> m_file_streamers;
+
 };

@@ -11,8 +11,9 @@ Model::Model()
     : Model(std::make_unique<Timer>(), 
             std::make_unique<FileSynchronizer>(), 
             std::make_unique<Scanner>(), 
-            std::make_unique<ConfigManager>(m_mainDirectoryPath))
+            std::make_unique<ConfigManager>())
 {
+    m_config_manager->setMainDirectoryPath(m_mainDirectoryPath);
 }
 
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
@@ -156,11 +157,35 @@ void Model::saveConfig()
 }
 
 void Model::setupStreaming()
-{
-    m_config_manager->loadStreamingConfig();
+{   
+    m_config_manager->loadStreamingConfig(m_fileStreamingConfig);
 }
 
 void Model::setupNetwork()
 {
-    m_config_manager->loadNetworkConfig();
+    m_config_manager->loadNetworkConfig(m_networkConfig);
+}
+
+void Model::startStreaming()
+{   
+    for(const auto& [dir, networkParams] : m_networkConfig){
+        const auto dirNameMatches = [&dir](auto& directory){return directory.first == dir;};
+        auto dirIter = std::find_if(m_fileStreamingConfig.begin(), m_fileStreamingConfig.end(), dirNameMatches);
+        if(dirIter != m_fileStreamingConfig.cend())
+        {
+            m_file_streamers.emplace(dir, std::make_unique<TxtFileStreamer>(networkParams.first, stoi(networkParams.second), dirIter->second));
+        }
+    }
+    for(const auto&[dir , fileStreamer] : m_file_streamers)
+    {
+        fileStreamer->startStreaming();
+    }
+}
+
+void Model::stopStreaming()
+{
+    for(const auto&[dir , fileStreamer] : m_file_streamers)
+    {
+        fileStreamer->stopStreaming();
+    }
 }

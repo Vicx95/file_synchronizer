@@ -193,12 +193,12 @@ void Controller::setupNetwork()
 
 void Controller::startStreaming()
 {
-
+    m_model->startStreaming();
 }
 
 void Controller::stopStreaming()
 {
-
+    m_model->stopStreaming();
 }
 
 void Controller::exit()
