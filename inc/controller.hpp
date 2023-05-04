@@ -32,7 +32,8 @@ private:
 
     private:
         enum class Action
-        {
+        {   
+            Exit = 0,
             AddDir = 1,
             RemoveDir = 2,
             RemoveFile = 3,
@@ -46,7 +47,8 @@ private:
             SaveConfig = 11,
             SetupStreaming = 12,
             SetupNetwork = 13,
-            Exit = 0
+            StartStreaming = 14,
+            StopStreaming = 15
         };
 
         std::unordered_map<Handlers::Action, pVoid, utils::EnumClassHash> m_handlerMap;
@@ -72,6 +74,8 @@ private:
     void saveConfig();
     void setupStreaming();
     void setupNetwork();
+    void startStreaming();
+    void stopStreaming();
     void exit();
 
     std::atomic<bool> m_isExitRequested = false;
