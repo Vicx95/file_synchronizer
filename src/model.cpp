@@ -8,22 +8,25 @@
 namespace fs = std::filesystem;
 
 Model::Model()
-    : Model(std::make_unique<Timer>(), std::make_unique<FileSynchronizer>(), std::make_unique<Scanner>(), std::make_unique<SerializerToJSON>())
+    : Model(std::make_unique<Timer>(), 
+            std::make_unique<FileSynchronizer>(), 
+            std::make_unique<Scanner>(), 
+            std::make_unique<ConfigManager>())
 {
+    m_config_manager->setMainDirectoryPath(m_mainDirectoryPath);
 }
 
 Model::Model(std::unique_ptr<i_Timer> syncTimer,
              std::unique_ptr<i_FileSynchronizer> fileSynchronizer,
              std::unique_ptr<i_Scanner> scanner,
-             std::unique_ptr<i_Serializer> serializer) noexcept
-    : m_syncTimer(std::move(syncTimer)),               //
-      m_fileSynchronizer(std::move(fileSynchronizer)), //
-      m_scanner(std::move(scanner)),                   //
-      m_serializer(std::move(serializer)),             //
-      m_interval(1000)                                 //
-      {
-
-      };
+             std::unique_ptr<i_ConfigManager> config_manager) noexcept
+    : m_syncTimer(std::move(syncTimer)),
+      m_fileSynchronizer(std::move(fileSynchronizer)),
+      m_scanner(std::move(scanner)),
+      m_config_manager(std::move(config_manager)),
+      m_interval(1000)
+{
+}
 
 ErrorCode Model::addDirectory(const std::string &dirName)
 {
@@ -145,16 +148,44 @@ fs::path Model::getMainDirectoryPath()
 
 void Model::readConfig()
 {
-    fs::remove_all(m_mainDirectoryPath);
-    fs::create_directory(m_mainDirectoryPath);
-    auto [dirs, files] = m_serializer->deserialize();
-    std::filesystem::copy(m_mainDirectoryPath / "../configDirectory", m_mainDirectoryPath, std::filesystem::copy_options::recursive);
+    m_config_manager->loadFileConfig();
 }
 
 void Model::saveConfig()
 {
-    fs::remove_all(std::filesystem::current_path() / "../configDirectory");
-    std::filesystem::copy(m_mainDirectoryPath, m_mainDirectoryPath / "../configDirectory", std::filesystem::copy_options::recursive);
+    m_config_manager->saveFileConfig();
+}
 
-    m_serializer->serialize();
+void Model::setupStreaming()
+{   
+    m_config_manager->loadStreamingConfig(m_fileStreamingConfig);
+}
+
+void Model::setupNetwork()
+{
+    m_config_manager->loadNetworkConfig(m_networkConfig);
+}
+
+void Model::startStreaming()
+{   
+    for(const auto& [dir, networkParams] : m_networkConfig){
+        const auto dirNameMatches = [&dir](auto& directory){return directory.first == dir;};
+        auto dirIter = std::find_if(m_fileStreamingConfig.begin(), m_fileStreamingConfig.end(), dirNameMatches);
+        if(dirIter != m_fileStreamingConfig.cend())
+        {
+            m_file_streamers.emplace(dir, std::make_unique<TxtFileStreamer>(networkParams.first, stoi(networkParams.second), dirIter->second));
+        }
+    }
+    for(const auto&[dir , fileStreamer] : m_file_streamers)
+    {
+        fileStreamer->startStreaming();
+    }
+}
+
+void Model::stopStreaming()
+{
+    for(const auto&[dir , fileStreamer] : m_file_streamers)
+    {
+        fileStreamer->stopStreaming();
+    }
 }

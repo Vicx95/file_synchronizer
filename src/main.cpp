@@ -11,12 +11,12 @@ int main()
 {
     try
     {
-        LOG_INFO("Synchronizer starting");
+        //LOG_INFO("Synchronizer starting");
 
         Controller c;
         c.run();
 
-        LOG_INFO("Synchronizer stopping");
+        //LOG_INFO("Synchronizer stopping");
     }
     catch (std::exception &e)
     {

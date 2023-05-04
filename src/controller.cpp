@@ -50,6 +50,10 @@ void Controller::init()
         {Handlers::Action::ForceSync, &Controller::forceSync},
         {Handlers::Action::ReadConfig, &Controller::readConfig},
         {Handlers::Action::SaveConfig, &Controller::saveConfig},
+        {Handlers::Action::SetupStreaming, &Controller::setupStreaming},
+        {Handlers::Action::SetupNetwork, &Controller::setupNetwork},
+        {Handlers::Action::StartStreaming, &Controller::startStreaming},
+        {Handlers::Action::StopStreaming, &Controller::stopStreaming},
         {Handlers::Action::Exit, &Controller::exit} //
     };
 }
@@ -175,6 +179,26 @@ void Controller::readConfig()
 void Controller::saveConfig()
 {
     m_model->saveConfig();
+}
+
+void Controller::setupStreaming()
+{
+    m_model->setupStreaming();
+}
+
+void Controller::setupNetwork()
+{
+    m_model->setupNetwork();
+}
+
+void Controller::startStreaming()
+{
+    m_model->startStreaming();
+}
+
+void Controller::stopStreaming()
+{
+    m_model->stopStreaming();
 }
 
 void Controller::exit()
